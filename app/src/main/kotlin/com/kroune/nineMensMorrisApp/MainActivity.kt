@@ -94,7 +94,8 @@ class MainActivity : ComponentActivity() {
                 composable<Navigation.OnlineGame> {
                     val id = it.toRoute<Navigation.OnlineGame>().id
                     OnlineGameScreen(
-                        id
+                        id,
+                        navController
                     ).InvokeRender()
                 }
                 composable<Navigation.AppStartAnimation> {

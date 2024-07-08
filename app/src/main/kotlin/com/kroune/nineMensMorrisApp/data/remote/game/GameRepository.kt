@@ -60,8 +60,6 @@ class GameRepository @Inject constructor() : GameRepositoryI {
      */
     private var searchingForGameJob: Deferred<Result<Long>>? = null
 
-    override val movesQueue = ConcurrentLinkedQueue<Movement>()
-
     override suspend fun isPlaying(jwtToken: String): Result<Long?> {
         return runCatching {
             val result = network.get("http$SERVER_ADDRESS$USER_API/is-playing") {
