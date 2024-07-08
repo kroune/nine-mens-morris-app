@@ -85,14 +85,21 @@ class AuthRepositoryImpl @Inject constructor() : AuthRepositoryI {
 
     override suspend fun checkJwtToken(jwtToken: String): Result<Boolean> {
         return runCatching {
-            val jwtTokenState = jwtToken
             val result = network.get("http$SERVER_ADDRESS$USER_API/check-jwt-token") {
                 method = HttpMethod.Get
                 url {
-                    parameters["jwtToken"] = jwtTokenState
+                    parameters["jwtToken"] = jwtToken
                 }
             }
-            result.bodyAsText().toBoolean()
+            val text = Json.decodeFromString<NetworkResponse>(result.bodyAsText())
+            if (text.code == 200) {
+                text.message!!.toBooleanStrict()
+            } else {
+                error("response code != 200 ${result.bodyAsText()}")
+            }
+        }.onFailure {
+            println("error checking jwt token")
+            it.printStack()
         }
     }
 }
