@@ -102,7 +102,7 @@ class MainActivity : ComponentActivity() {
                 }
                 composable<Navigation.ViewAccount> {
                     val id = it.toRoute<Navigation.ViewAccount>().id
-                    ViewAccountScreen(id).InvokeRender()
+                    ViewAccountScreen(id, navController).InvokeRender()
                 }
             }
         }

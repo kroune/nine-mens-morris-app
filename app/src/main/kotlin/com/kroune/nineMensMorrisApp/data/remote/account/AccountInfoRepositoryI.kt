@@ -52,4 +52,9 @@ interface AccountInfoRepositoryI {
      * it is null if this account isn't valid
      */
     suspend fun getIdByJwtToken(jwtToken: String): Result<Long?>
+
+    /**
+     * logs out of the account
+     */
+    fun logout()
 }

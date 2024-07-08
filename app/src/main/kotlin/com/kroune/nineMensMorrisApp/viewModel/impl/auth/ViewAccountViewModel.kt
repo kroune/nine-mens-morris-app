@@ -20,11 +20,17 @@ import java.io.File
  */
 class ViewAccountViewModel @AssistedInject constructor(
     private val accountInfoRepositoryI: AccountInfoRepositoryI,
+    private val authRepositoryI: AccountInfoRepositoryI,
     /**
      * account id
      */
     @Assisted val id: Long
 ) : ViewModelI() {
+
+    /**
+     * if it is our own account
+     */
+    val ownAccount = accountInfoRepositoryI.accountIdState.value == id
 
     /**
      * factory for [AssistedInject]
@@ -139,6 +145,13 @@ class ViewAccountViewModel @AssistedInject constructor(
                 return@launch
             accountName.value = name
         }
+    }
+
+    /**
+     * logs out of the account
+     */
+    fun logout() {
+        authRepositoryI.logout()
     }
 
     init {

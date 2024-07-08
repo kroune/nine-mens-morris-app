@@ -277,7 +277,8 @@ class WelcomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .zIndex(Float.MAX_VALUE)
-                .background(Color(0, 0, 0, 50))
+                .background(Color(0, 0, 0, 50)),
+            contentAlignment = Alignment.Center
         ) {
             // we shouldn't be stuck on this screen, since network client timeout is 5 s
             LoadingCircle()

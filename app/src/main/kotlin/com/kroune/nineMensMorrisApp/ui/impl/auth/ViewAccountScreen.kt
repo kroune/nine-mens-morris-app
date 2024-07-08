@@ -5,10 +5,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,10 +22,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.kroune.nineMensMorrisApp.Navigation
 import com.kroune.nineMensMorrisApp.R
 import com.kroune.nineMensMorrisApp.common.AppTheme
 import com.kroune.nineMensMorrisApp.common.LoadingCircle
 import com.kroune.nineMensMorrisApp.di.factoryProvider
+import com.kroune.nineMensMorrisApp.navigateSingleTopTo
 import com.kroune.nineMensMorrisApp.ui.interfaces.ScreenModelI
 import com.kroune.nineMensMorrisApp.viewModel.impl.auth.ViewAccountViewModel
 
@@ -32,7 +37,8 @@ import com.kroune.nineMensMorrisApp.viewModel.impl.auth.ViewAccountViewModel
  * @param id id of the account
  */
 class ViewAccountScreen(
-    private val id: Long
+    private val id: Long,
+    private val navController: NavHostController
 ) : ScreenModelI {
     override lateinit var viewModel: ViewAccountViewModel
 
@@ -41,7 +47,9 @@ class ViewAccountScreen(
         val factory = factoryProvider().viewAccountViewModelFactory()
         viewModel = viewModel(factory = ViewAccountViewModel.provideFactory(factory, id))
         AppTheme {
-            Column {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Row(
                     modifier = Modifier
                         .height(100.dp)
@@ -51,7 +59,31 @@ class ViewAccountScreen(
                     DrawName()
                 }
                 DrawAccountCreationDate()
+                if (viewModel.ownAccount) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight(),
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
+                        DrawOwnAccountOptions()
+                    }
+                }
             }
+        }
+    }
+
+    /**
+     * draws specific settings for our account
+     */
+    @Composable
+    fun DrawOwnAccountOptions() {
+        Button(
+            onClick = {
+                viewModel.logout()
+                navController.navigateSingleTopTo(Navigation.Welcome)
+            }
+        ) {
+            Text("Log out")
         }
     }
 

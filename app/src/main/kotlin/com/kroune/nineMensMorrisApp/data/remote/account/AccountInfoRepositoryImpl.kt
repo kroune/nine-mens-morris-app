@@ -122,6 +122,12 @@ class AccountInfoRepositoryImpl : AccountInfoRepositoryI {
         }
     }
 
+    override fun logout() {
+        updateAccountIdState(null)
+        updateJwtTokenState(null)
+        Log.d("ACCOUNT", "Logged out")
+    }
+
     // TODO: implement this on server
     override suspend fun getAccountPictureById(id: Long): Result<ByteArray> {
         return runCatching<AccountInfoRepositoryImpl, ByteArray> {
