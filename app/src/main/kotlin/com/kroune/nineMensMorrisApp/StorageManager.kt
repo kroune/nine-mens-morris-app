@@ -23,6 +23,13 @@ object StorageManager {
     }
 
     /**
+     * gets string from sharedPreferences
+     */
+    fun getString(key: String): String? {
+        return sharedPreferences.getString(key, null)
+    }
+
+    /**
      * puts long into the sharedPreferences
      */
     fun putLong(key: String, value: Long?) {
@@ -33,5 +40,16 @@ object StorageManager {
                 this.putLong(key, value)
             }
         }
+    }
+
+    /**
+     * gets long from sharedPreferences
+     */
+    fun getLong(key: String): Long? {
+        val value = sharedPreferences.getLong(key, -1L)
+        if (value == -1L) {
+            return null
+        }
+        return value
     }
 }

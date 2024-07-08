@@ -21,7 +21,7 @@ import kotlinx.serialization.json.Json
  * remote repository implementation
  */
 class AccountInfoRepositoryImpl : AccountInfoRepositoryI {
-    override val accountIdState = MutableStateFlow<Long?>(null)
+    override val accountIdState = MutableStateFlow(StorageManager.getLong("accountId"))
 
     override fun updateAccountIdState(value: Long?) {
         Log.d("AccountId", "account id has changed to $value")
@@ -29,7 +29,7 @@ class AccountInfoRepositoryImpl : AccountInfoRepositoryI {
         accountIdState.value = value
     }
 
-    override val jwtTokenState = MutableStateFlow<String?>(null)
+    override val jwtTokenState = MutableStateFlow(StorageManager.getString("jwtToken"))
 
     override fun updateJwtTokenState(value: String?) {
         Log.d("JwtToken", "jwt token has changed to $value")
