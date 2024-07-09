@@ -5,7 +5,6 @@ import com.kroune.nineMensMorrisApp.StorageManager
 import com.kroune.nineMensMorrisApp.common.SERVER_ADDRESS
 import com.kroune.nineMensMorrisApp.common.USER_API
 import com.kroune.nineMensMorrisApp.data.remote.Common.network
-import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
@@ -77,6 +76,21 @@ class AccountInfoRepositoryImpl : AccountInfoRepositoryI {
         }
     }
 
+    override suspend fun getAccountRatingById(id: Long): Result<Long?> {
+        return runCatching {
+            val request = network.get("http${SERVER_ADDRESS}${USER_API}/get-rating-by-id") {
+                method = HttpMethod.Get
+                url {
+                    parameters["id"] = id.toString()
+                }
+            }.bodyAsText()
+            Json.decodeFromString<Long?>(request)
+        }.onFailure {
+            println("error getting account rating $id")
+            it.printStackTrace()
+        }
+    }
+
     override suspend fun getAccountDateById(id: Long): Result<Triple<Int, Int, Int>?> {
         return runCatching {
             val request = network.get("http${SERVER_ADDRESS}${USER_API}/get-creation-date-by-id") {
@@ -128,12 +142,17 @@ class AccountInfoRepositoryImpl : AccountInfoRepositoryI {
         Log.d("ACCOUNT", "Logged out")
     }
 
-    // TODO: implement this on server
     override suspend fun getAccountPictureById(id: Long): Result<ByteArray> {
-        return runCatching<AccountInfoRepositoryImpl, ByteArray> {
-            val url = "https://shapka-youtube.ru/wp-content/uploads/2020/08/man-silhouette.jpg"
-            val httpResponse: HttpResponse = network.get(url)
-            httpResponse.body()
+        return runCatching {
+            val httpResponse: HttpResponse =
+                network.get("http${SERVER_ADDRESS}${USER_API}/get-picture-by-id") {
+                    method = HttpMethod.Get
+                    url {
+                        parameters["id"] = id.toString()
+                    }
+                }
+            val response = httpResponse.bodyAsText()
+            Json.decodeFromString<ByteArray>(response)
         }.onFailure {
             println("error getting account picture $id")
             it.printStackTrace()

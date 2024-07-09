@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -17,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -58,6 +60,7 @@ class ViewAccountScreen(
                     DrawIcon()
                     DrawName()
                 }
+                DrawRating()
                 DrawAccountCreationDate()
                 if (viewModel.ownAccount) {
                     Box(
@@ -69,6 +72,19 @@ class ViewAccountScreen(
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * draws user rating
+     */
+    @Composable
+    fun DrawRating() {
+        val rating = viewModel.accountRating.collectAsState().value
+        if (rating == null) {
+            Text("User rating is loading...")
+        } else {
+            Text("User rating is $rating")
         }
     }
 
@@ -105,20 +121,23 @@ class ViewAccountScreen(
      */
     @Composable
     fun DrawIcon() {
-        val file = viewModel.tempPictureFile.collectAsState()
-        if (file.value != null) {
+        val byteArray = viewModel.pictureByteArray.collectAsState()
+        if (byteArray.value != null) {
             Image(
-                bitmap = BitmapFactory.decodeFile(file.value!!.absolutePath).asImageBitmap(),
+                bitmap = BitmapFactory.decodeByteArray(byteArray.value!!, 0, byteArray.value!!.size)
+                    .asImageBitmap(),
                 contentDescription = "Profile icon",
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(100.dp)
+                    .clip(CircleShape)
             )
         } else {
             Icon(
                 painter = painterResource(R.drawable.baseline_account_circle_48),
                 contentDescription = "profile loading icon",
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(100.dp)
+                    .clip(CircleShape)
             )
         }
     }

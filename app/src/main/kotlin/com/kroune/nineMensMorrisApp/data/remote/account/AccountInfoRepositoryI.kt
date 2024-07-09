@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * provides information about account
  */
 interface AccountInfoRepositoryI {
-
     /**
      * unique identifier of the account
      * null = account id is loading
@@ -31,6 +30,11 @@ interface AccountInfoRepositoryI {
      * this function should be used when updating [jwtTokenState]
      */
     fun updateJwtTokenState(value: String?)
+
+    /**
+     * @return account rating by it's id
+     */
+    suspend fun getAccountRatingById(id: Long): Result<Long?>
 
     /**
      * @return account login (name) by it's id

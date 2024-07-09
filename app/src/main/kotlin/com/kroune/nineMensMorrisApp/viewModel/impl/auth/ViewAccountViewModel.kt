@@ -9,11 +9,8 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
 
 /**
  * view model for viewing account
@@ -66,12 +63,40 @@ class ViewAccountViewModel @AssistedInject constructor(
     /**
      * file with account picture or null if it is still loading
      */
-    val tempPictureFile = MutableStateFlow<File?>(null)
+    val pictureByteArray = MutableStateFlow<ByteArray?>(null)
 
     /**
      * account creation date or null if it is still loading
      */
     val accountCreationDate = MutableStateFlow<String?>(null)
+
+    /**
+     * account rating or null if it is still loading
+     */
+    val accountRating = MutableStateFlow<Long?>(null)
+
+    /**
+     * updates [accountRating]
+     */
+    fun getRatingById() {
+        if (accountRating.value != null) {
+            return
+        }
+        CoroutineScope(networkScope).launch {
+            var rating: Long? = null
+            @Suppress("UnusedPrivateProperty")
+            for (i in 0..5) {
+                val newBuffer = accountInfoRepositoryI.getAccountRatingById(id).getOrNull()
+                if (newBuffer != null) {
+                    rating = newBuffer
+                    break
+                }
+            }
+            if (rating == null)
+                return@launch
+            accountRating.value = rating
+        }
+    }
 
     /**
      * updates [accountCreationDate]
@@ -98,10 +123,10 @@ class ViewAccountViewModel @AssistedInject constructor(
     }
 
     /**
-     * updates [tempPictureFile]
+     * updates [pictureByteArray]
      */
     fun getProfilePicture() {
-        if (tempPictureFile.value != null) {
+        if (pictureByteArray.value != null) {
             return
         }
         CoroutineScope(networkScope).launch {
@@ -116,11 +141,7 @@ class ViewAccountViewModel @AssistedInject constructor(
             }
             if (buffer == null)
                 return@launch
-            val file = withContext(Dispatchers.IO) {
-                File.createTempFile("profilePicture-$id", ".webp")
-            }
-            file.writeBytes(buffer)
-            tempPictureFile.value = file
+            pictureByteArray.value = buffer
         }
     }
 
@@ -155,6 +176,7 @@ class ViewAccountViewModel @AssistedInject constructor(
     }
 
     init {
+        getRatingById()
         getProfilePicture()
         getLoginById()
         getProfileName()
