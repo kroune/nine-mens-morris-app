@@ -36,7 +36,6 @@ import com.kroune.nineMensMorrisApp.viewModel.impl.auth.ViewAccountViewModel
 
 /**
  * account view screen
- * @param id id of the account
  */
 class ViewAccountScreen(
     private val id: Long,

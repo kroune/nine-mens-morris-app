@@ -40,7 +40,6 @@ import kotlinx.serialization.json.Json
  */
 class OnlineGameViewModel @AssistedInject constructor(
     private val accountInfoRepositoryI: AccountInfoRepositoryI,
-    private val gameRepository: GameRepositoryI,
     @Assisted
     private val gameId: Long
 ) : ViewModelI() {
