@@ -312,7 +312,8 @@ class GameBoardScreen(
         val uiState = viewModel.uiState.collectAsState().value
         Box(
             modifier = Modifier
-                .size(BUTTON_WIDTH)
+                .size(BUTTON_WIDTH),
+            contentAlignment = Alignment.Center
         ) {
             Button(
                 modifier = Modifier
