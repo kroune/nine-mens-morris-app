@@ -21,7 +21,7 @@ object Common {
     val network = HttpClient(OkHttp) {
         install(HttpTimeout) {
             this.requestTimeoutMillis = 5 * 1000
-            this.socketTimeoutMillis = 5 * 1000
+            this.socketTimeoutMillis = 60 * 60 * 1000
             this.connectTimeoutMillis = 5 * 1000
         }
         install(WebSockets)

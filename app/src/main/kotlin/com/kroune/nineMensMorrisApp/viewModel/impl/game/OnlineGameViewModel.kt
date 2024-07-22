@@ -13,7 +13,6 @@ import com.kroune.nineMensMorrisApp.data.local.impl.game.GameBoardData
 import com.kroune.nineMensMorrisApp.data.local.impl.game.OnlineGameData
 import com.kroune.nineMensMorrisApp.data.remote.Common.network
 import com.kroune.nineMensMorrisApp.data.remote.account.AccountInfoRepositoryI
-import com.kroune.nineMensMorrisApp.data.remote.game.GameRepositoryI
 import com.kroune.nineMensMorrisApp.ui.impl.game.GameBoardScreen
 import com.kroune.nineMensMorrisApp.viewModel.interfaces.ViewModelI
 import dagger.assisted.Assisted
@@ -28,6 +27,7 @@ import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import io.ktor.websocket.send
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -84,6 +84,8 @@ class OnlineGameViewModel @AssistedInject constructor(
      */
     val gameEnded = mutableStateOf(false)
 
+    private var gameReconnectCoroutine: Job? = null
+
     private fun connectToTheGameAndPlay() {
         gameJob?.cancel()
         gameJob = viewModelScope.launch {
@@ -120,8 +122,12 @@ class OnlineGameViewModel @AssistedInject constructor(
             } catch (e: Exception) {
                 println("error accessing playing game")
                 e.printStack()
-                // we try to relaunch this shit
-                connectToTheGameAndPlay()
+                gameReconnectCoroutine?.cancel()
+                gameReconnectCoroutine = viewModelScope.launch {
+                    delay(2000)
+                    // we try to relaunch this shit
+                    connectToTheGameAndPlay()
+                }
             }
         }
     }
