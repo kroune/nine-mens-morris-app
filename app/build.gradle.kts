@@ -66,34 +66,33 @@ android {
 }
 
 dependencies {
-    implementation("androidx.activity:activity-compose:1.9.0")
-    implementation(platform("androidx.compose:compose-bom:2024.06.00"))
-    implementation("androidx.compose.ui:ui-tooling-preview:1.7.0-beta04")
-    implementation("androidx.compose.material3:material3:1.3.0-beta04")
-    implementation("androidx.navigation:navigation-compose:2.8.0-beta04")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.06.00"))
-    debugImplementation("androidx.compose.ui:ui-tooling:1.7.0-beta04")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.0")
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation.compose)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    debugImplementation(libs.androidx.ui.tooling)
+    implementation(libs.kotlinx.serialization.json)
 
     // ktor
-    implementation("io.ktor:ktor-client-core:3.0.0-beta-1")
-    implementation("io.ktor:ktor-client-okhttp:3.0.0-beta-1")
-    implementation("io.ktor:ktor-client-auth:3.0.0-beta-1")
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.ohhttp)
 
     // test dependencies
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    testImplementation(platform("org.junit:junit-bom:5.11.0-M2"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.0-M2")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.8")
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    debugImplementation(libs.androidx.ui.test.manifest)
 
     // my own dependencies
-    implementation("com.github.kroune:9-men-s-morris-lib:297220e0e1")
-    implementation("com.github.kroune:9-men-s-morris-shared:068a583b9b")
+    implementation(libs.x.men.s.morris.lib)
+    implementation(libs.x.men.s.morris.shared)
 
     // di
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
 }
 
 kapt {
