@@ -28,7 +28,11 @@ class SearchingForGameScreen(
         viewModel = hiltViewModel()
         val id = viewModel.gameId.collectAsState().value
         if (id != null) {
-            navController.navigateSingleTopTo(Navigation.OnlineGame(id))
+            navController.navigateSingleTopTo(Navigation.OnlineGame(id)) {
+                popUpTo(Navigation.SearchingOnlineGame) {
+                    inclusive = true
+                }
+            }
         }
         AppTheme {
             Text("${resources.getString(R.string.searching_for_game)}...")

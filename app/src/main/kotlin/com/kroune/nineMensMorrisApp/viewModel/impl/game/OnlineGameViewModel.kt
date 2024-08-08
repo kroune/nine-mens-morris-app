@@ -20,12 +20,13 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.webSocket
-import io.ktor.utils.io.printStack
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
 import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import io.ktor.websocket.send
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -121,7 +122,7 @@ class OnlineGameViewModel @AssistedInject constructor(
                 }
             } catch (e: Exception) {
                 println("error accessing playing game")
-                e.printStack()
+                e.printStackTrace()
                 gameReconnectCoroutine?.cancel()
                 gameReconnectCoroutine = viewModelScope.launch {
                     delay(2000)
@@ -150,6 +151,14 @@ class OnlineGameViewModel @AssistedInject constructor(
         onClick = { index -> this.response(index) },
         navController = null
     )
+
+    fun giveUp() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val string = Json.encodeToString<Movement>(Movement(null, null))
+            println("user gave up")
+            session!!.send(string)
+        }
+    }
 
     private fun GameBoardData.response(index: Int) {
         // check if we can make this move

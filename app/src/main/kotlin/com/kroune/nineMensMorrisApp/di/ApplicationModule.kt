@@ -7,7 +7,7 @@ import com.kroune.nineMensMorrisApp.data.remote.account.AccountInfoRepositoryI
 import com.kroune.nineMensMorrisApp.data.remote.account.AccountInfoRepositoryImpl
 import com.kroune.nineMensMorrisApp.data.remote.auth.AuthRepositoryI
 import com.kroune.nineMensMorrisApp.data.remote.auth.AuthRepositoryImpl
-import com.kroune.nineMensMorrisApp.data.remote.game.GameRepository
+import com.kroune.nineMensMorrisApp.data.remote.game.GameRepositoryImpl
 import com.kroune.nineMensMorrisApp.data.remote.game.GameRepositoryI
 import com.kroune.nineMensMorrisApp.ui.impl.auth.SignInScreen
 import com.kroune.nineMensMorrisApp.ui.impl.auth.ViewAccountScreen
@@ -56,7 +56,7 @@ class ApplicationModule {
     @Provides
     @Singleton
     fun provideGameRepository(): GameRepositoryI {
-        return GameRepository()
+        return GameRepositoryImpl()
     }
 }
 

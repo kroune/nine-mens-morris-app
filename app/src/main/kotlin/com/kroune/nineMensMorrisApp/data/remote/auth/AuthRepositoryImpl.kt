@@ -1,13 +1,11 @@
 package com.kroune.nineMensMorrisApp.data.remote.auth
 
-import com.kroune.NetworkResponse
 import com.kroune.nineMensMorrisApp.common.SERVER_ADDRESS
 import com.kroune.nineMensMorrisApp.common.USER_API
 import com.kroune.nineMensMorrisApp.data.remote.Common.network
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpMethod
-import io.ktor.utils.io.printStack
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
@@ -39,20 +37,10 @@ class AuthRepositoryImpl @Inject constructor() : AuthRepositoryI {
                         parameters["password"] = password
                     }
                 }.bodyAsText()
-            val registerResultText = Json.decodeFromString<NetworkResponse>(registerResult)
-            return when (registerResultText.code) {
-                // TODO: finish this
-                200 -> {
-                    Result.success(registerResultText.message!!)
-                }
-
-                else -> {
-                    Result.failure(ServerException(registerResultText.message!!))
-                }
-            }
+            Json.decodeFromString<String>(registerResult)
         }.onFailure {
             println("error accessing ${"http${SERVER_ADDRESS}${USER_API}/reg"}")
-            it.printStack()
+            it.printStackTrace()
         }
     }
 
@@ -66,20 +54,10 @@ class AuthRepositoryImpl @Inject constructor() : AuthRepositoryI {
                         parameters["password"] = password
                     }
                 }.bodyAsText()
-            val loginResultText = Json.decodeFromString<NetworkResponse>(loginResult)
-            return when (loginResultText.code) {
-                // TODO: finish this
-                200 -> {
-                    Result.success(loginResultText.message!!)
-                }
-
-                else -> {
-                    Result.failure(ServerException(loginResultText.message!!))
-                }
-            }
+            Json.decodeFromString<String>(loginResult)
         }.onFailure {
             println("error accessing ${"http${SERVER_ADDRESS}${USER_API}/login"}")
-            it.printStack()
+            it.printStackTrace()
         }
     }
 
@@ -91,25 +69,10 @@ class AuthRepositoryImpl @Inject constructor() : AuthRepositoryI {
                     parameters["jwtToken"] = jwtToken
                 }
             }
-            val text = Json.decodeFromString<NetworkResponse>(result.bodyAsText())
-            if (text.code == 200) {
-                text.message!!.toBooleanStrict()
-            } else {
-                error("response code != 200 ${result.bodyAsText()}")
-            }
+            Json.decodeFromString<Boolean>(result.bodyAsText())
         }.onFailure {
             println("error checking jwt token")
-            it.printStack()
+            it.printStackTrace()
         }
     }
 }
-
-/**
- * Represents the server's response to client requests.
- */
-class ServerException(
-    /**
-     * server exception description
-     */
-    val text: String
-) : Exception()

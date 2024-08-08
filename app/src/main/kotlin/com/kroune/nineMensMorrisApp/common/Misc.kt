@@ -2,6 +2,7 @@ package com.kroune.nineMensMorrisApp.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -57,7 +58,7 @@ fun List<Movement>.toPositions(startPos: Position): List<Position> {
  * @param function everything ui-related that happens inside of the app
  */
 @Composable
-inline fun AppTheme(function: () -> Unit) {
+inline fun AppTheme(function: BoxScope.() -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()

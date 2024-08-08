@@ -78,6 +78,7 @@ dependencies {
     // ktor
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.ohhttp)
+    implementation(libs.ktor.client.logging)
 
     // test dependencies
     androidTestImplementation(libs.androidx.ui.test.junit4)

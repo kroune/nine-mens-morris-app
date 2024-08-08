@@ -45,12 +45,10 @@ class ViewAccountViewModel @AssistedInject constructor(
          * provides factory
          */
         fun provideFactory(
-            assistedVMFactory: AssistedVMFactory,
-            id: Long
+            assistedVMFactory: AssistedVMFactory, id: Long
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                @Suppress("UNCHECKED_CAST")
-                return assistedVMFactory.create(id) as T
+                @Suppress("UNCHECKED_CAST") return assistedVMFactory.create(id) as T
             }
         }
     }
@@ -83,18 +81,9 @@ class ViewAccountViewModel @AssistedInject constructor(
             return
         }
         CoroutineScope(networkScope).launch {
-            var rating: Long? = null
-            @Suppress("UnusedPrivateProperty")
-            for (i in 0..5) {
-                val newBuffer = accountInfoRepositoryI.getAccountRatingById(id).getOrNull()
-                if (newBuffer != null) {
-                    rating = newBuffer
-                    break
-                }
-            }
-            if (rating == null)
-                return@launch
-            accountRating.value = rating
+            val requestResult =
+                accountInfoRepositoryI.getAccountRatingById(id).getOrNull() ?: return@launch
+            accountRating.value = requestResult
         }
     }
 
@@ -106,18 +95,10 @@ class ViewAccountViewModel @AssistedInject constructor(
             return
         }
         CoroutineScope(networkScope).launch {
-            var calendar: Triple<Int, Int, Int>? = null
-            @Suppress("UnusedPrivateProperty")
-            for (i in 0..5) {
-                val newBuffer = accountInfoRepositoryI.getAccountDateById(id).getOrNull()
-                if (newBuffer != null) {
-                    calendar = newBuffer
-                    break
-                }
-            }
-            if (calendar == null)
-                return@launch
-            val finalString = "${calendar.first}-${calendar.second}-${calendar.third}"
+            val requestResult =
+                accountInfoRepositoryI.getAccountDateById(id).getOrNull() ?: return@launch
+            val finalString =
+                "${requestResult.first}-${requestResult.second}-${requestResult.third}"
             accountCreationDate.value = finalString
         }
     }
@@ -130,17 +111,8 @@ class ViewAccountViewModel @AssistedInject constructor(
             return
         }
         CoroutineScope(networkScope).launch {
-            var buffer: ByteArray? = null
-            @Suppress("UnusedPrivateProperty")
-            for (i in 0..5) {
-                val newBuffer = accountInfoRepositoryI.getAccountPictureById(id).getOrNull()
-                if (newBuffer != null) {
-                    buffer = newBuffer
-                    break
-                }
-            }
-            if (buffer == null)
-                return@launch
+            val buffer =
+                accountInfoRepositoryI.getAccountPictureById(id).getOrNull() ?: return@launch
             pictureByteArray.value = buffer
         }
     }
@@ -153,17 +125,7 @@ class ViewAccountViewModel @AssistedInject constructor(
             return
         }
         CoroutineScope(networkScope).launch {
-            var name: String? = null
-            @Suppress("UnusedPrivateProperty")
-            for (i in 0..5) {
-                val newBuffer = accountInfoRepositoryI.getAccountNameById(id).getOrNull()
-                if (newBuffer != null) {
-                    name = newBuffer
-                    break
-                }
-            }
-            if (name == null)
-                return@launch
+            val name = accountInfoRepositoryI.getAccountNameById(id).getOrNull() ?: return@launch
             accountName.value = name
         }
     }

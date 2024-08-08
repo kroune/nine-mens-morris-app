@@ -1,6 +1,5 @@
 package com.kroune.nineMensMorrisApp.data.remote.game
 
-import com.kr8ne.mensMorris.move.Movement
 import com.kroune.nineMensMorrisApp.common.SERVER_ADDRESS
 import com.kroune.nineMensMorrisApp.common.USER_API
 import com.kroune.nineMensMorrisApp.data.remote.Common.network
@@ -9,21 +8,20 @@ import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpMethod
-import io.ktor.utils.io.printStack
-import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
 import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import java.util.concurrent.ConcurrentLinkedQueue
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 /**
  * Repository for interacting with server games
  */
-class GameRepository @Inject constructor() : GameRepositoryI {
+class GameRepositoryImpl @Inject constructor() : GameRepositoryI {
     override suspend fun startSearchingGame(jwtToken: String): Result<Long> {
         // we use this to make sure this function isn't executed in parallel
         if (searchingForGameJob?.isCompleted == false) {
@@ -38,18 +36,28 @@ class GameRepository @Inject constructor() : GameRepositoryI {
                     }
                 }) {
                     while (true) {
-                        val serverMessage = (incoming.receive() as? Frame.Text)?.readText()
-                        if (serverMessage != null) {
-                            gameId = serverMessage
-                            close(CloseReason(CloseReason.Codes.NORMAL, "ok"))
-                            break
+                        incoming.consumeEach { frame ->
+                            if (frame !is Frame.Text) {
+                                return@consumeEach
+                            }
+                            val serverMessage = frame.readText()
+                            println(serverMessage)
+                            val serverData =
+                                Json.decodeFromString<Pair<Boolean, Long>>(serverMessage)
+                            if (!serverData.first) {
+                                gameId = serverData.second.toString()
+                                println("new game id - $gameId")
+                                close()
+                                return@webSocket
+                            }
+                            println("expectedWaitingTime - ${serverData.second}")
                         }
                     }
                 }
                 gameId!!.toLong()
             }.onFailure {
                 println("error accessing ${"ws$SERVER_ADDRESS$USER_API/search-for-game"}")
-                it.printStack()
+                it.printStackTrace()
             }
         }
         return searchingForGameJob!!.await()
@@ -71,7 +79,7 @@ class GameRepository @Inject constructor() : GameRepositoryI {
             result.bodyAsText().toLongOrNull()
         }.onFailure {
             println("error accessing ${"http$SERVER_ADDRESS$USER_API/is-playing"}")
-            it.printStack()
+            it.printStackTrace()
         }
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -113,11 +114,12 @@ class MainActivity : ComponentActivity() {
 /**
  * custom navigation implementation, prevents duplications in backstack entries
  */
-fun NavController.navigateSingleTopTo(route: Navigation) {
+fun NavController.navigateSingleTopTo(route: Navigation, builder: NavOptionsBuilder.() -> Unit = {}) {
     val currentScreen = this@navigateSingleTopTo.currentBackStackEntry?.destination?.route
     val newScreen = Json.encodeToString(route)
     println("DEBUG: $currentScreen, $newScreen")
     this@navigateSingleTopTo.navigate(route) {
+        builder()
         launchSingleTop = true
     }
 }
