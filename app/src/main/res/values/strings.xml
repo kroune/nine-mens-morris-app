@@ -32,4 +32,8 @@
     <string name="pass_doesnt_match">Your passwords doesn\'t match</string>
     <string name="have_account_question">Have an account?</string>
     <string name="sign_up">Sign up</string>
+    <string name="switching_to_next_screen">switching to next screen...</string>
+    <string name="auth_app_error">Unrecognised error. Either app version is obsolete or something serious broke</string>
+    <string name="auth_no_account_found">No account with such login + password found</string>
+    <string name="auth_server_error">Server error, something bad must have happened. Report this issue on github</string>
 </resources>

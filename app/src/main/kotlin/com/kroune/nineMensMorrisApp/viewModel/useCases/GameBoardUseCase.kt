@@ -1,93 +1,60 @@
-package com.kroune.nineMensMorrisApp.data.local.impl.game
+package com.kroune.nineMensMorrisApp.viewModel.useCases
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.navigation.NavHostController
-import com.kr8ne.mensMorris.GameState
-import com.kr8ne.mensMorris.Position
-import com.kr8ne.mensMorris.gameStartPosition
-import com.kr8ne.mensMorris.move.Movement
-import com.kr8ne.mensMorris.move.moveProvider
-import com.kroune.nineMensMorrisApp.Navigation
 import com.kroune.nineMensMorrisApp.data.local.interfaces.DataI
-import com.kroune.nineMensMorrisApp.navigateSingleTopTo
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.kroune.nineMensMorrisLib.GameState
+import com.kroune.nineMensMorrisLib.Position
+import com.kroune.nineMensMorrisLib.gameStartPosition
+import com.kroune.nineMensMorrisLib.move.Movement
+import com.kroune.nineMensMorrisLib.move.moveProvider
 import java.util.Stack
 
 /**
- * data for game board
+ * Game board use case
  */
-@Suppress("LongParameterList")
-class GameBoardData(
+class GameBoardUseCase(
     /**
      * stores current position
      */
-    var pos: MutableStateFlow<Position> = MutableStateFlow(gameStartPosition),
+    val pos: MutableState<Position> = mutableStateOf(gameStartPosition),
     /**
      * stores all pieces which can be moved (used for highlighting)
      */
-    val moveHints: MutableStateFlow<List<Int>> = MutableStateFlow(listOf()),
+    val moveHints: MutableState<List<Int>> = mutableStateOf(listOf()),
     /**
      * what we should execute on undo
      */
-    val onUndo: () -> Unit = {},
+    val onUndo: GameBoardUseCase.() -> Unit,
     /**
      * what we should execute on redo
      */
-    val onRedo: () -> Unit = {},
+    val onRedo: GameBoardUseCase.() -> Unit,
     /**
      * what will happen if we click some circle
      */
-    var onClick: GameBoardData.(index: Int) -> Unit = {},
+    var onClick: GameBoardUseCase.(index: Int) -> Unit,
     /**
      * used for storing info of the previous (valid one) clicked button
      */
     val selectedButton: MutableState<Int?> = mutableStateOf(null),
     /**
-     * navigation controller
+     * what should happen on game end
      */
-    val navController: NavHostController?
+    val onGameEnd: (pos: Position) -> Unit
 ) : DataI() {
 
     /**
      * stores all movements (positions) history
      */
-    private val movesHistory: Stack<Position> = Stack()
+    val movesHistory: Stack<Position> = Stack()
 
     /**
      * stores a moves we have undone
      * resets them if we do any other move
      */
-    private val undoneMoveHistory: Stack<Position> = Stack()
-
-    /**
-     * undoes the last move
-     */
-    var handleUndo = {
-        if (!movesHistory.empty()) {
-            undoneMoveHistory.push(movesHistory.peek())
-            movesHistory.pop()
-            pos.value = movesHistory.lastOrNull() ?: gameStartPosition
-            moveHints.value = arrayListOf()
-            selectedButton.value = null
-            onUndo()
-        }
-    }
-
-    /**
-     * handles redo (re applies moves we have undone)
-     */
-    var handleRedo = {
-        if (!undoneMoveHistory.empty()) {
-            movesHistory.push(undoneMoveHistory.peek())
-            undoneMoveHistory.pop()
-            pos.value = movesHistory.lastOrNull() ?: gameStartPosition
-            selectedButton.value = null
-            moveHints.value = arrayListOf()
-            onRedo()
-        }
-    }
+    val undoneMoveHistory: Stack<Position> = Stack()
 
     /**
      * processes selected movement
@@ -97,7 +64,7 @@ class GameBoardData(
         selectedButton.value = null
         saveMove(pos.value)
         if (pos.value.gameState() == GameState.End) {
-            navController?.navigateSingleTopTo(Navigation.GameEnd(pos.value))
+            onGameEnd(pos.value)
         }
     }
 

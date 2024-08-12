@@ -9,7 +9,6 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.websocket.WebSockets
-import io.ktor.http.isSuccess
 import kotlinx.coroutines.Dispatchers
 
 /**
@@ -31,7 +30,8 @@ object Common {
         }
         install(HttpRequestRetry) {
             maxRetries = 5
-            retryIf { _, response -> !response.status.isSuccess() }
+            // retry on timeout
+            retryIf(maxRetries = 5) { request, response -> response.status.value == 408 }
             retryOnServerErrors(maxRetries = 5)
             retryOnException(maxRetries = 5, retryOnTimeout = true)
             exponentialDelay()
@@ -45,4 +45,30 @@ object Common {
             pingInterval = 3000L
         }
     }
+}
+
+/**
+ * exception when receiving info from the server
+ * @param status status of the call
+ * @param reason body of the response server returned
+ */
+class ClientNetworkException(
+    val status: Int,
+    val reason: String
+) : Exception()
+
+/**
+ * result of the auth
+ */
+sealed class AuthResults {
+    /**
+     * Everything worked
+     */
+    class Success : AuthResults()
+
+    /**
+     * Indicates failure
+     * @param stringId can be used to get a matching exception description from resources
+     */
+    class Failure(val stringId: Int) : AuthResults()
 }

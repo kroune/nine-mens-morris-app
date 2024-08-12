@@ -1,20 +1,19 @@
 package com.kroune.nineMensMorrisApp.viewModel.impl.game
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.kr8ne.mensMorris.Position
-import com.kr8ne.mensMorris.gameStartPosition
-import com.kr8ne.mensMorris.move.Movement
 import com.kroune.nineMensMorrisApp.common.SERVER_ADDRESS
 import com.kroune.nineMensMorrisApp.common.USER_API
-import com.kroune.nineMensMorrisApp.data.local.impl.game.GameBoardData
-import com.kroune.nineMensMorrisApp.data.local.impl.game.OnlineGameData
 import com.kroune.nineMensMorrisApp.data.remote.Common.network
 import com.kroune.nineMensMorrisApp.data.remote.account.AccountInfoRepositoryI
-import com.kroune.nineMensMorrisApp.ui.impl.game.GameBoardScreen
 import com.kroune.nineMensMorrisApp.viewModel.interfaces.ViewModelI
+import com.kroune.nineMensMorrisApp.viewModel.useCases.GameBoardUseCase
+import com.kroune.nineMensMorrisLib.Position
+import com.kroune.nineMensMorrisLib.gameStartPosition
+import com.kroune.nineMensMorrisLib.move.Movement
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -29,8 +28,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -70,15 +67,23 @@ class OnlineGameViewModel @AssistedInject constructor(
         }
     }
 
-    override val data = OnlineGameData()
-
     private suspend fun DefaultClientWebSocketSession.get(): String {
-        return (incoming.receive() as Frame.Text).readText()
+        val text = (incoming.receive() as Frame.Text).readText()
+        println("DEBUG: $text")
+        return text
     }
 
     private var gameJob: Job? = null
 
+    /**
+     * our web socket session
+     */
     private var session: DefaultClientWebSocketSession? = null
+
+    /**
+     * id of the enemy
+     */
+    var enemyId: MutableState<Long?> = mutableStateOf(null)
 
     /**
      * tells if the game has ended
@@ -101,8 +106,9 @@ class OnlineGameViewModel @AssistedInject constructor(
                         }
                     }) {
                     session = this
-                    isGreen = get().toBooleanStrict()
+                    isGreen.value = get().toBooleanStrict()
                     gameBoard.pos.value = Json.decodeFromString<Position>(get())
+                    enemyId.value = get().toLong()
                     while (true) {
                         // receive the server's data
                         val serverMessage = Json.decodeFromString<Movement>(get())
@@ -113,10 +119,10 @@ class OnlineGameViewModel @AssistedInject constructor(
                             break
                         }
                         gameBoard.pos.value = serverMessage.producePosition(gameBoard.pos.value)
-                        if (gameBoard.pos.value.pieceToMove == isGreen) {
-                            gameBoard.viewModel.handleHighLighting()
+                        if (gameBoard.pos.value.pieceToMove == isGreen.value) {
+                            gameBoard.handleHighLighting()
                         } else {
-                            gameBoard.viewModel.data.moveHints.value = listOf()
+                            gameBoard.moveHints.clear()
                         }
                     }
                 }
@@ -137,21 +143,22 @@ class OnlineGameViewModel @AssistedInject constructor(
     /**
      * tells if user is green or blue
      */
-    private var isGreen: Boolean? = null
-        set(value) {
-            _uiState.value = _uiState.value.copy(isGreen = value)
-            field = value
-        }
+    var isGreen: MutableState<Boolean?> = mutableStateOf(null)
 
     /**
      * our game board
      */
-    private val gameBoard = GameBoardScreen(
+    val gameBoard = GameBoardViewModel(
         pos = gameStartPosition,
         onClick = { index -> this.response(index) },
-        navController = null
+        onGameEnd = {
+            println("Game ended")
+        }
     )
 
+    /**
+     * sends information that we gave up
+     */
     fun giveUp() {
         CoroutineScope(Dispatchers.IO).launch {
             val string = Json.encodeToString<Movement>(Movement(null, null))
@@ -160,50 +167,27 @@ class OnlineGameViewModel @AssistedInject constructor(
         }
     }
 
-    private fun GameBoardData.response(index: Int) {
+    private fun GameBoardUseCase.response(index: Int) {
         // check if we can make this move
-        if (isGreen == gameBoard.pos.value.pieceToMove) {
-            gameBoard.viewModel.data.getMovement(index)?.let {
+        if (isGreen.value == gameBoard.pos.value.pieceToMove) {
+            handleClick(index)
+            if (gameBoard.pos.value.pieceToMove == isGreen.value) {
+                handleHighLighting()
+            } else {
+                // we can't make any move if it isn't our move
+                gameBoard.moveHints.clear()
+            }
+            gameBoard.getMovement(index)?.let {
                 viewModelScope.launch {
                     val string = Json.encodeToString<Movement>(it)
                     // post our move
                     session!!.send(string)
                 }
             }
-            handleClick(index)
-            if (gameBoard.viewModel.data.pos.value.pieceToMove == isGreen) {
-                handleHighLighting()
-            } else {
-                // we can't make any move if it isn't our move
-                gameBoard.viewModel.data.moveHints.value = listOf()
-            }
         }
     }
-
-    private val _uiState =
-        MutableStateFlow(OnlineGameScreenUiState(gameBoard, isGreen))
-
-    /**
-     * exposed ui state
-     */
-    val uiState: StateFlow<OnlineGameScreenUiState>
-        get() = _uiState
 
     init {
         connectToTheGameAndPlay()
     }
 }
-
-/**
- * ui state
- */
-data class OnlineGameScreenUiState(
-    /**
-     * game board
-     */
-    val gameBoard: GameBoardScreen,
-    /**
-     * is green status
-     */
-    val isGreen: Boolean?
-)

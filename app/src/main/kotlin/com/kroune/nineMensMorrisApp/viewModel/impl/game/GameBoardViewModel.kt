@@ -2,15 +2,11 @@ package com.kroune.nineMensMorrisApp.viewModel.impl.game
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
-import com.kr8ne.mensMorris.Position
-import com.kr8ne.mensMorris.gameStartPosition
-import com.kroune.nineMensMorrisApp.data.local.impl.game.GameBoardData
 import com.kroune.nineMensMorrisApp.viewModel.interfaces.ViewModelI
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import com.kroune.nineMensMorrisApp.viewModel.useCases.GameBoardUseCase
+import com.kroune.nineMensMorrisLib.Position
+import com.kroune.nineMensMorrisLib.gameStartPosition
+import com.kroune.nineMensMorrisLib.move.Movement
 
 /**
  * view model for game board
@@ -24,103 +20,113 @@ class GameBoardViewModel(
     /**
      * what will happen if we click some circle
      */
-    onClick: GameBoardData.(index: Int) -> Unit,
+    onClick: GameBoardUseCase.(index: Int) -> Unit = { index ->
+        handleClick(index)
+        handleHighLighting()
+    },
     /**
      * what we should additionally do on undo
      */
-    onUndo: () -> Unit = {},
+    onUndo: GameBoardUseCase.() -> Unit = {
+        if (!movesHistory.empty()) {
+            undoneMoveHistory.push(movesHistory.peek())
+            movesHistory.pop()
+            this.pos.value = movesHistory.lastOrNull() ?: gameStartPosition
+            this.moveHints.value = arrayListOf()
+            this.selectedButton.value = null
+        }
+    },
     /**
      * what we should execute on redo
      */
-    onRedo: () -> Unit = {},
+    onRedo: GameBoardUseCase.() -> Unit = {
+        if (!undoneMoveHistory.empty()) {
+            movesHistory.push(undoneMoveHistory.peek())
+            undoneMoveHistory.pop()
+            this.pos.value = movesHistory.lastOrNull() ?: gameStartPosition
+            this.selectedButton.value = null
+            this.moveHints.value = arrayListOf()
+        }
+    },
     /**
      * stores all pieces which can be moved (used for highlighting)
      */
-    moveHints: List<Int> = listOf(),
+    val moveHints: MutableList<Int> = mutableListOf(),
     /**
      * used for storing info of the previous (valid one) clicked button
      */
-    selectedButton: MutableState<Int?> = mutableStateOf(null),
-    /**
-     * navigation controller
-     */
-    navController: NavHostController?
+    val selectedButton: MutableState<Int?> = mutableStateOf(null),
+    onGameEnd: (Position) -> Unit
 ) : ViewModelI() {
 
-    override val data =
-        GameBoardData(
-            MutableStateFlow(pos),
-            MutableStateFlow(moveHints),
-            onUndo,
-            onRedo,
-            onClick,
-            selectedButton,
-            navController
-        )
-
-    private val _uiState: MutableStateFlow<GameBoardUiState> =
-        MutableStateFlow(GameBoardUiState(pos, moveHints))
-
-    /**
-     * current app ui state
-     */
-    val uiState: StateFlow<GameBoardUiState> = _uiState
-
-    init {
-        viewModelScope.launch {
-            data.pos
-                .collect { pos ->
-                    _uiState.value = _uiState.value.copy(pos = pos)
-                }
-        }
-        viewModelScope.launch {
-            data.moveHints
-                .collect { moveHints ->
-                    _uiState.value = _uiState.value.copy(moveHints = moveHints)
-                }
-        }
-    }
+    private val useCase = GameBoardUseCase(
+        mutableStateOf(pos),
+        mutableStateOf(moveHints),
+        onUndo,
+        onRedo,
+        onClick,
+        selectedButton,
+        onGameEnd
+    )
 
     /**
      * quick access
      */
-    fun onClick(index: Int) {
-        return data.onClick(data, index)
+    fun handleClick(index: Int) {
+        return useCase.handleClick(index)
     }
+
+    /**
+     * handles clicking on the button with provided index
+     */
+    fun onClick(index: Int) {
+        return useCase.run {
+            onClick(index)
+        }
+    }
+
+    /**
+     * current position
+     */
+    val pos: MutableState<Position> = useCase.pos
 
     /**
      * quick access
      */
     fun handleUndo() {
-        return data.handleUndo()
+        useCase.run {
+            this.onUndo()
+        }
     }
 
     /**
      * quick access
      */
     fun handleRedo() {
-        return data.handleRedo()
+        useCase.run {
+            this.onRedo()
+        }
     }
 
     /**
      * quick access
      */
     fun handleHighLighting() {
-        data.handleHighLighting()
+        useCase.handleHighLighting()
+    }
+
+    /**
+     * applies move to the position
+     */
+    fun processMove(move: Movement) {
+        useCase.processMove(move)
+    }
+
+    /**
+     * gets move produced after clicking button with provided index
+     */
+    fun getMovement(elementIndex: Int): Movement? {
+        return useCase.getMovement(elementIndex)
     }
 }
-
-/**
- * represents current ui state
- */
-data class GameBoardUiState(
-    /**
-     * current position
-     */
-    val pos: Position,
-    /**
-     * all possible moves
-     */
-    val moveHints: List<Int>
-)
 

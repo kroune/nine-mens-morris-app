@@ -2,10 +2,12 @@ package com.kroune.nineMensMorrisApp.data.remote.auth
 
 import com.kroune.nineMensMorrisApp.common.SERVER_ADDRESS
 import com.kroune.nineMensMorrisApp.common.USER_API
+import com.kroune.nineMensMorrisApp.data.remote.ClientNetworkException
 import com.kroune.nineMensMorrisApp.data.remote.Common.network
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpMethod
+import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
@@ -36,8 +38,12 @@ class AuthRepositoryImpl @Inject constructor() : AuthRepositoryI {
                         parameters["login"] = login
                         parameters["password"] = password
                     }
-                }.bodyAsText()
-            Json.decodeFromString<String>(registerResult)
+                }
+            if (registerResult.status.isSuccess()) {
+                Json.decodeFromString<String>(registerResult.bodyAsText())
+            } else {
+                throw ClientNetworkException(registerResult.status.value, registerResult.bodyAsText())
+            }
         }.onFailure {
             println("error accessing ${"http${SERVER_ADDRESS}${USER_API}/reg"}")
             it.printStackTrace()
@@ -53,8 +59,12 @@ class AuthRepositoryImpl @Inject constructor() : AuthRepositoryI {
                         parameters["login"] = login
                         parameters["password"] = password
                     }
-                }.bodyAsText()
-            Json.decodeFromString<String>(loginResult)
+                }
+            if (loginResult.status.isSuccess()) {
+                Json.decodeFromString<String>(loginResult.bodyAsText())
+            } else {
+                throw ClientNetworkException(loginResult.status.value, loginResult.bodyAsText())
+            }
         }.onFailure {
             println("error accessing ${"http${SERVER_ADDRESS}${USER_API}/login"}")
             it.printStackTrace()

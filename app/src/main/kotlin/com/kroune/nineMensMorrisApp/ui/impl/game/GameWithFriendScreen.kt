@@ -8,42 +8,52 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.kroune.nineMensMorrisApp.BUTTON_WIDTH
 import com.kroune.nineMensMorrisApp.common.AppTheme
-import com.kroune.nineMensMorrisApp.ui.interfaces.ScreenModelI
+import com.kroune.nineMensMorrisLib.Position
 
 /**
- * Game main screen
+ * Renders game with friend screen
  */
-class GameWithFriendScreen(
-    /**
-     * navigation controller
-     */
-    private val navController: NavHostController?,
-    private var gameBoard: GameBoardScreen = GameBoardScreen(navController = navController),
-) : ScreenModelI {
+@Composable
+fun RenderGameWithFriendScreen(
+    pos: Position,
+    selectedButton: Int?,
+    moveHints: List<Int>,
+    onClick: (Int) -> Unit,
+    handleUndo: () -> Unit,
+    handleRedo: () -> Unit,
 
-
-    @Composable
-    override fun InvokeRender() {
-        AppTheme {
-            gameBoard.RenderPieceCount()
-            DrawMainPage()
-            gameBoard.InvokeRender()
-            gameBoard.RenderUndoRedo()
-        }
-    }
-
-    @Composable
-    private fun DrawMainPage() {
+    positions: List<Position>,
+    depth: Int,
+    increaseDepth: () -> Unit,
+    decreaseDepth: () -> Unit,
+    startAnalyze: () -> Unit,
+) {
+    AppTheme {
+        RenderGameBoard(
+            pos = pos,
+            selectedButton = selectedButton,
+            moveHints = moveHints,
+            onClick = {
+                onClick(it)
+            }
+        )
+        RenderPieceCount(pos = pos)
+        RenderUndoRedo(handleUndo = handleUndo, handleRedo = handleRedo)
         Box(
             modifier = Modifier
                 .padding(0.dp, BUTTON_WIDTH * 9.5f, 0.dp, 0.dp)
                 .height(IntrinsicSize.Max)
                 .fillMaxWidth()
         ) {
-            GameAnalyzeScreen(gameBoard.pos).InvokeRender()
+            RenderGameAnalyzeScreen(
+                positions = positions,
+                depth = depth,
+                startAnalyze = { startAnalyze() },
+                increaseDepth = { increaseDepth() },
+                decreaseDepth = { decreaseDepth() }
+            )
         }
     }
 }

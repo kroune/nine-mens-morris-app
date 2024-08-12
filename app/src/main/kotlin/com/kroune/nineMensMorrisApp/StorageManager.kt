@@ -14,6 +14,22 @@ object StorageManager {
     lateinit var sharedPreferences: SharedPreferences
 
     /**
+     * gets boolean from the sharedPreferences
+     */
+    fun getBoolean(key: String, defaultValue: Boolean): Boolean {
+        return sharedPreferences.getBoolean(key, defaultValue)
+    }
+
+    /**
+     * puts boolean into the sharedPreferences
+     */
+    fun putBoolean(key: String, value: Boolean) {
+        sharedPreferences.edit {
+            this.putBoolean(key, value)
+        }
+    }
+
+    /**
      * puts string into the sharedPreferences
      */
     fun putString(key: String, value: String?) {

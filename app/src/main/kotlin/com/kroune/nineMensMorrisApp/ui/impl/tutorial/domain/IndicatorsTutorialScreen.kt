@@ -12,20 +12,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import com.kr8ne.mensMorris.BLUE_
-import com.kr8ne.mensMorris.EMPTY
-import com.kr8ne.mensMorris.GREEN
-import com.kr8ne.mensMorris.Position
 import com.kroune.nineMensMorrisApp.BUTTON_WIDTH
 import com.kroune.nineMensMorrisApp.R
-import com.kroune.nineMensMorrisApp.ui.impl.game.GameBoardScreen
-import com.kroune.nineMensMorrisApp.ui.interfaces.ScreenModelI
+import com.kroune.nineMensMorrisApp.ui.impl.game.RenderGameBoard
+import com.kroune.nineMensMorrisApp.ui.impl.game.RenderPieceCount
+import com.kroune.nineMensMorrisLib.BLUE_
+import com.kroune.nineMensMorrisLib.EMPTY
+import com.kroune.nineMensMorrisLib.GREEN
+import com.kroune.nineMensMorrisLib.Position
 
 /**
  * this screen tells about information indicators provide
  */
-class IndicatorsTutorialScreen(private val resources: Resources) : ScreenModelI {
-    private val position = Position(
+@Composable
+fun RenderIndicatorsTutorialScreen(
+    resources: Resources
+) {
+    val position = Position(
         // @formatter:off
         arrayOf(
             BLUE_,                  BLUE_,                  EMPTY,
@@ -39,33 +42,34 @@ class IndicatorsTutorialScreen(private val resources: Resources) : ScreenModelI 
         // @formatter:on
         1u, 2u, pieceToMove = false, removalCount = 0u
     )
-
-    private val gameBoard = GameBoardScreen(position, navController = null)
-
-    @Composable
-    override fun InvokeRender() {
-        val scrollState = rememberScrollState()
+    val scrollState = rememberScrollState()
+    Column(
+        modifier = Modifier.verticalScroll(scrollState)
+    ) {
+        Box {
+            RenderGameBoard(
+                pos = position,
+                selectedButton = 3,
+                moveHints = listOf(),
+                onClick = {}
+            )
+            RenderPieceCount(
+                pos = position
+            )
+        }
         Column(
-            modifier = Modifier.verticalScroll(scrollState)
+            modifier = Modifier.padding(start = BUTTON_WIDTH, end = BUTTON_WIDTH),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box {
-                gameBoard.RenderPieceCount()
-                gameBoard.InvokeRender()
-            }
-            Column(
-                modifier = Modifier.padding(start = BUTTON_WIDTH, end = BUTTON_WIDTH),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = resources.getString(R.string.tutorial_indicator_piece_count),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = resources.getString(R.string.tutorial_fly_condition),
-                    textAlign = TextAlign.Center
-                )
-            }
+            Text(
+                text = resources.getString(R.string.tutorial_indicator_piece_count),
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = resources.getString(R.string.tutorial_fly_condition),
+                textAlign = TextAlign.Center
+            )
         }
     }
 }

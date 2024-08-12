@@ -6,24 +6,38 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.kr8ne.mensMorris.Position
+import com.kroune.nineMensMorrisApp.data.remote.AuthResults
+import com.kroune.nineMensMorrisApp.di.factoryProvider
 import com.kroune.nineMensMorrisApp.ui.impl.AppStartAnimationScreen
-import com.kroune.nineMensMorrisApp.ui.impl.WelcomeScreen
-import com.kroune.nineMensMorrisApp.ui.impl.auth.SignInScreen
-import com.kroune.nineMensMorrisApp.ui.impl.auth.SignUpScreen
-import com.kroune.nineMensMorrisApp.ui.impl.auth.ViewAccountScreen
-import com.kroune.nineMensMorrisApp.ui.impl.game.GameEndScreen
-import com.kroune.nineMensMorrisApp.ui.impl.game.GameWithBotScreen
-import com.kroune.nineMensMorrisApp.ui.impl.game.GameWithFriendScreen
-import com.kroune.nineMensMorrisApp.ui.impl.game.OnlineGameScreen
+import com.kroune.nineMensMorrisApp.ui.impl.RenderWelcomeScreen
+import com.kroune.nineMensMorrisApp.ui.impl.auth.RenderSignInScreen
+import com.kroune.nineMensMorrisApp.ui.impl.auth.RenderSignUpScreen
+import com.kroune.nineMensMorrisApp.ui.impl.auth.RenderViewAccountScreen
+import com.kroune.nineMensMorrisApp.ui.impl.game.RenderGameEnd
+import com.kroune.nineMensMorrisApp.ui.impl.game.RenderGameWithBotScreen
+import com.kroune.nineMensMorrisApp.ui.impl.game.RenderGameWithFriendScreen
+import com.kroune.nineMensMorrisApp.ui.impl.game.RenderOnlineGameScreen
 import com.kroune.nineMensMorrisApp.ui.impl.game.SearchingForGameScreen
+import com.kroune.nineMensMorrisApp.viewModel.impl.WelcomeViewModel
+import com.kroune.nineMensMorrisApp.viewModel.impl.auth.SignInViewModel
+import com.kroune.nineMensMorrisApp.viewModel.impl.auth.SignUpViewModel
+import com.kroune.nineMensMorrisApp.viewModel.impl.auth.ViewAccountViewModel
+import com.kroune.nineMensMorrisApp.viewModel.impl.game.GameWithBotViewModel
+import com.kroune.nineMensMorrisApp.viewModel.impl.game.GameWithFriendViewModel
+import com.kroune.nineMensMorrisApp.viewModel.impl.game.OnlineGameViewModel
+import com.kroune.nineMensMorrisApp.viewModel.impl.game.SearchingForGameViewModel
+import com.kroune.nineMensMorrisLib.Position
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -46,7 +60,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val sharedPreferences = getSharedPreferences(
-            "com.kr8ne.mensMorris",
+            "com.kroune.nineMensMorrisLib",
             MODE_PRIVATE
         )
         StorageManager.sharedPreferences = sharedPreferences
@@ -63,48 +77,175 @@ class MainActivity : ComponentActivity() {
                     fadeOut(animationSpec = tween(800))
                 }) {
                 composable<Navigation.Welcome> {
-                    WelcomeScreen(navController, sharedPreferences, resources).InvokeRender()
+                    val vm: WelcomeViewModel = hiltViewModel()
+                    RenderWelcomeScreen(
+                        accountId = vm.accountId.value,
+                        checkJwtToken = suspend { vm.checkJwtToken().getOrThrow() },
+                        hasJwtToken = { vm.hasJwtToken() },
+                        resources = resources,
+                        navController = navController
+                    )
                 }
                 composable<Navigation.GameWithBot> {
-                    GameWithBotScreen(navController = navController).InvokeRender()
+                    val vm = remember {
+                        GameWithBotViewModel(
+                            onGameEnd = { navController.navigate(Navigation.GameEnd(it)) }
+                        )
+                    }
+                    RenderGameWithBotScreen(
+                        pos = vm.gameBoard.pos.value,
+                        selectedButton = vm.gameBoard.selectedButton.value,
+                        moveHints = vm.gameBoard.moveHints,
+                        onClick = { vm.gameBoard.onClick(it) },
+                        handleUndo = { vm.gameBoard.handleUndo() },
+                        handleRedo = { vm.gameBoard.handleRedo() },
+                    )
                 }
                 composable<Navigation.GameWithFriend> {
-                    GameWithFriendScreen(navController).InvokeRender()
+                    val vm = remember {
+                        GameWithFriendViewModel(
+                            onGameEnd = {
+                                navController.navigate(Navigation.GameEnd(this.pos.value))
+                            }
+                        )
+                    }
+                    RenderGameWithFriendScreen(
+                        vm.pos.value,
+                        vm.selectedButton.value,
+                        vm.moveHints,
+                        { vm.onClick(it) },
+                        { vm.handleUndo() },
+                        { vm.handleRedo() },
+                        vm.positions.value,
+                        vm.depth.value,
+                        { vm.increaseDepth() },
+                        { vm.decreaseDepth() },
+                        { vm.startAnalyze() }
+                    )
                 }
                 composable<Navigation.GameEnd>(
                     typeMap = mapOf(typeOf<Position>() to PositionNavType())
                 ) {
                     val pos = it.toRoute<Navigation.GameEnd>().position
-                    GameEndScreen(pos, navController).InvokeRender()
+                    RenderGameEnd(pos = pos) {
+                        navController.navigateSingleTopTo(Navigation.Welcome)
+                    }
                 }
                 composable<Navigation.SignUp>(
                     typeMap = mapOf(typeOf<Navigation>() to NavigationNavType())
                 ) {
-                    val route = it.toRoute<Navigation.SignUp>().nextRoute
-                    SignUpScreen(navController, route, resources).InvokeRender()
+                    val nextRoute = remember {
+                        it.toRoute<Navigation.SignIn>().nextRoute
+                    }
+                    val vm: SignUpViewModel = hiltViewModel()
+                    if (vm.authResult.value is AuthResults.Success) {
+                        if (nextRoute is Navigation.ViewAccount) {
+                            navController.navigateSingleTopTo(Navigation.ViewAccount(vm.accountId!!))
+                        } else {
+                            navController.navigateSingleTopTo(nextRoute)
+                        }
+                    }
+                    RenderSignUpScreen(
+                        loginValidator = {
+                            vm.loginValidator(it)
+                        },
+                        passwordValidator = { password: String ->
+                            vm.passwordValidator(password)
+                        },
+                        onRegister = { login: String, password: String ->
+                            vm.register(login, password)
+                        },
+                        navController = navController,
+                        resources = resources,
+                        nextRoute = nextRoute,
+                        authResult = vm.authResult.value
+                    )
                 }
                 composable<Navigation.SignIn>(
                     typeMap = mapOf(typeOf<Navigation>() to NavigationNavType())
                 ) {
-                    val nextRoute = it.toRoute<Navigation.SignIn>().nextRoute
-                    SignInScreen(navController, nextRoute, resources).InvokeRender()
+                    val nextRoute = remember {
+                        it.toRoute<Navigation.SignIn>().nextRoute
+                    }
+                    val vm: SignInViewModel = hiltViewModel()
+                    if (vm.authResult.value is AuthResults.Success) {
+                        if (nextRoute is Navigation.ViewAccount) {
+                            navController.navigateSingleTopTo(Navigation.ViewAccount(vm.accountId!!))
+                        } else {
+                            navController.navigateSingleTopTo(nextRoute)
+                        }
+                    }
+                    RenderSignInScreen(
+                        loginValidator = {
+                            vm.loginValidator(it)
+                        },
+                        passwordValidator = { password: String ->
+                            vm.passwordValidator(password)
+                        },
+                        onLogin = { login: String, password: String ->
+                            vm.login(login, password)
+                        },
+                        navController = navController,
+                        resources = resources,
+                        nextRoute = nextRoute,
+                        authResult = vm.authResult.value
+                    )
                 }
                 composable<Navigation.SearchingOnlineGame> {
-                    SearchingForGameScreen(navController, resources).InvokeRender()
+                    val vm: SearchingForGameViewModel = hiltViewModel()
+                    val id = vm.gameId.collectAsState().value
+                    if (id != null) {
+                        navController.navigateSingleTopTo(Navigation.OnlineGame(id)) {
+                            popUpTo(Navigation.SearchingOnlineGame) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                    SearchingForGameScreen(resources)
                 }
                 composable<Navigation.OnlineGame> {
-                    val id = it.toRoute<Navigation.OnlineGame>().id
-                    OnlineGameScreen(
-                        id,
-                        navController
-                    ).InvokeRender()
+                    val gameId = remember {
+                        it.toRoute<Navigation.OnlineGame>().id
+                    }
+                    val factory = factoryProvider().onlineGameViewModelFactory()
+                    val vm: OnlineGameViewModel =
+                        viewModel(factory = OnlineGameViewModel.provideFactory(factory, gameId))
+                    RenderOnlineGameScreen(
+                        pos = vm.gameBoard.pos.value,
+                        selectedButton = vm.gameBoard.selectedButton.value,
+                        moveHints = vm.gameBoard.moveHints,
+                        onClick = {
+                            vm.gameBoard.onClick(it)
+                        },
+                        handleUndo = { },
+                        handleRedo = { },
+                        onGiveUp = { vm.giveUp() },
+                        gameEnded = vm.gameEnded.value,
+                        isGreen = vm.isGreen.value,
+                        navController = navController
+                    )
                 }
                 composable<Navigation.AppStartAnimation> {
-                    AppStartAnimationScreen(navController).InvokeRender()
+                    AppStartAnimationScreen() {
+                        navController.navigate(Navigation.Welcome)
+                    }
                 }
                 composable<Navigation.ViewAccount> {
-                    val id = it.toRoute<Navigation.ViewAccount>().id
-                    ViewAccountScreen(id, navController).InvokeRender()
+                    val id = remember {
+                        it.toRoute<Navigation.ViewAccount>().id
+                    }
+                    val factory = factoryProvider().viewAccountViewModelFactory()
+                    val vm: ViewAccountViewModel =
+                        viewModel(factory = ViewAccountViewModel.provideFactory(factory, id))
+                    RenderViewAccountScreen(
+                        logout = { vm.logout() },
+                        navController = navController,
+                        ownAccount = vm.ownAccount,
+                        accountCreationDate = vm.accountCreationDate.value,
+                        accountName = vm.accountName.value,
+                        pictureByteArray = vm.pictureByteArray.value,
+                        accountRating = vm.accountRating.value
+                    )
                 }
             }
         }
@@ -114,7 +255,10 @@ class MainActivity : ComponentActivity() {
 /**
  * custom navigation implementation, prevents duplications in backstack entries
  */
-fun NavController.navigateSingleTopTo(route: Navigation, builder: NavOptionsBuilder.() -> Unit = {}) {
+fun NavController.navigateSingleTopTo(
+    route: Navigation,
+    builder: NavOptionsBuilder.() -> Unit = {}
+) {
     val currentScreen = this@navigateSingleTopTo.currentBackStackEntry?.destination?.route
     val newScreen = Json.encodeToString(route)
     println("DEBUG: $currentScreen, $newScreen")

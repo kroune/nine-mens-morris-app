@@ -9,11 +9,7 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpMethod
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
 /**
@@ -41,38 +37,6 @@ class AccountInfoRepositoryImpl : AccountInfoRepositoryI {
         if (value == null) {
             updateAccountIdState(null)
             return
-        }
-        // we don't want to use incorrect account id
-        // it will be null until a new one is received
-        updateAccountIdState(null)
-        CoroutineScope(Dispatchers.IO).launch {
-            var failureCounter = 0
-            while (true) {
-                val idResult = getIdByJwtToken(value)
-                if (idResult.isFailure) {
-                    // error making request
-                    delay(3000L)
-                    continue
-                }
-                val newId = idResult.getOrThrow()
-                if (newId == null) {
-                    failureCounter++
-                    if (failureCounter > 5) {
-                        // some wierd shit is happening, let's just sign out
-                        updateAccountIdState(null)
-                        updateJwtTokenState(null)
-                        Log.e(
-                            "ACCOUNT",
-                            "User successfully logged in, but server could not provide id for this account"
-                        )
-                        return@launch
-                    }
-                    continue
-                }
-                // we were able to update account id
-                updateAccountIdState(newId)
-                break
-            }
         }
     }
 
@@ -121,7 +85,7 @@ class AccountInfoRepositoryImpl : AccountInfoRepositoryI {
         }
     }
 
-    override suspend fun getIdByJwtToken(jwtToken: String): Result<Long?> {
+    override suspend fun getIdByJwtToken(jwtToken: String): Result<Long> {
         return runCatching {
             val request = network.get("http${SERVER_ADDRESS}${USER_API}/get-id-by-jwt-token") {
                 method = HttpMethod.Get
@@ -129,7 +93,7 @@ class AccountInfoRepositoryImpl : AccountInfoRepositoryI {
                     parameters["jwtToken"] = jwtToken
                 }
             }.bodyAsText()
-            Json.decodeFromString<Long?>(request)
+            Json.decodeFromString<Long>(request)
         }.onFailure {
             println("error getting account id $jwtToken")
             it.printStackTrace()

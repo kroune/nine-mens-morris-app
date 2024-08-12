@@ -18,105 +18,30 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kr8ne.mensMorris.Position
 import com.kroune.nineMensMorrisApp.BUTTON_WIDTH
-import com.kroune.nineMensMorrisApp.ui.interfaces.ScreenModelI
-import com.kroune.nineMensMorrisApp.viewModel.impl.game.GameAnalyzeViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.kroune.nineMensMorrisLib.Position
 
 /**
- * game analyzing screen
+ * Renders game analysis
  */
-class GameAnalyzeScreen(
-    pos: MutableStateFlow<Position>
-) : ScreenModelI {
-    override val viewModel = GameAnalyzeViewModel(pos)
-
-    @Composable
-    override fun InvokeRender() {
-        DrawGameAnalyze()
-    }
-
-    /**
-     * draws ui elements for accessing game analyzes
-     */
-    @Composable
-    fun DrawGameAnalyze() {
-        // I have tried to find a good placement of analyze screen, but it just doesn't suit
-        if (LocalConfiguration.current.orientation != ORIENTATION_PORTRAIT)
-            return
-        val uiState = viewModel.uiState.collectAsState()
-        val positions = uiState.value.positions
-        if (positions.isNotEmpty()) {
-            DrawPositionsSequence(positions)
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(), Alignment.TopCenter
-        ) {
-            Button(onClick = {
-                viewModel.startAnalyze()
-            }) {
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("Analyze")
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Button(
-                            onClick = {
-                                viewModel.decreaseDepth()
-                            },
-                            colors = ButtonColors(
-                                Color(177, 134, 255, 50),
-                                Color.White,
-                                Color.Unspecified,
-                                Color.Unspecified
-                            )
-                        ) {
-                            // may be it is a bit better to use some icons
-                            // but I will leave it like this for now
-                            Text("-", fontSize = 30.sp)
-                        }
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text("depth - ${uiState.value.depth}", fontSize = 13.sp)
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Button(
-                            onClick = {
-                                viewModel.increaseDepth()
-                            },
-                            colors = ButtonColors(
-                                Color(177, 134, 255, 50),
-                                Color.White,
-                                Color.Unspecified,
-                                Color.Unspecified
-                            )
-                        ) {
-                            // may be it is a bit better to use some icons
-                            // but I will leave it like this for now
-                            Text("+", fontSize = 22.sp)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * draws some positions sequence
-     */
-    @Composable
-    fun DrawPositionsSequence(positions: List<Position>) {
+@Composable
+fun RenderGameAnalyzeScreen(
+    positions: List<Position>,
+    depth: Int,
+    startAnalyze: () -> Unit,
+    increaseDepth: () -> Unit,
+    decreaseDepth: () -> Unit
+) {
+    // I have tried to find a good placement of analyze screen, but it just doesn't suit
+    if (LocalConfiguration.current.orientation != ORIENTATION_PORTRAIT)
+        return
+    if (positions.isNotEmpty()) {
         Box(
             modifier = Modifier
                 .padding(0.dp, BUTTON_WIDTH * 3f, 0.dp, 0.dp)
@@ -130,11 +55,65 @@ class GameAnalyzeScreen(
                         .weight(1f, false)
                 ) {
                     positions.forEach {
-                        GameBoardScreen(
+                        RenderGameBoard(
                             it,
-                            onClick = {},
-                            navController = null
-                        ).InvokeRender()
+                            null,
+                            mutableListOf(),
+                            onClick = {}
+                        )
+                    }
+                }
+            }
+        }
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth(), Alignment.TopCenter
+    ) {
+        Button(onClick = {
+            startAnalyze()
+        }) {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("Analyze")
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Button(
+                        onClick = {
+                            decreaseDepth()
+                        },
+                        colors = ButtonColors(
+                            Color(177, 134, 255, 50),
+                            Color.White,
+                            Color.Unspecified,
+                            Color.Unspecified
+                        )
+                    ) {
+                        // may be it is a bit better to use some icons
+                        // but I will leave it like this for now
+                        Text("-", fontSize = 30.sp)
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text("depth - $depth", fontSize = 13.sp)
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Button(
+                        onClick = {
+                            increaseDepth()
+                        },
+                        colors = ButtonColors(
+                            Color(177, 134, 255, 50),
+                            Color.White,
+                            Color.Unspecified,
+                            Color.Unspecified
+                        )
+                    ) {
+                        // may be it is a bit better to use some icons
+                        // but I will leave it like this for now
+                        Text("+", fontSize = 22.sp)
                     }
                 }
             }

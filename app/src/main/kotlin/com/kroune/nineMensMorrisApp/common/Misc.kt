@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.kr8ne.mensMorris.Position
-import com.kr8ne.mensMorris.move.Movement
+import com.kroune.nineMensMorrisLib.Position
+import com.kroune.nineMensMorrisLib.move.Movement
 
 /**
  * provides a way to get an element from pair

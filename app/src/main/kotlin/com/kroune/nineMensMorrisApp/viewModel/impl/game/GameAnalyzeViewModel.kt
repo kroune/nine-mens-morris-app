@@ -1,12 +1,12 @@
 package com.kroune.nineMensMorrisApp.viewModel.impl.game
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.kr8ne.mensMorris.Position
 import com.kroune.nineMensMorrisApp.common.toPositions
-import com.kroune.nineMensMorrisApp.data.local.impl.game.GameAnalyzeData
 import com.kroune.nineMensMorrisApp.viewModel.interfaces.ViewModelI
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.kroune.nineMensMorrisApp.viewModel.useCases.GameAnalyzeUseCase
+import com.kroune.nineMensMorrisLib.Position
 import kotlinx.coroutines.launch
 
 /**
@@ -16,60 +16,46 @@ class GameAnalyzeViewModel(
     /**
      * winning positions consequence
      */
-    val pos: MutableStateFlow<Position>
+    val pos: MutableState<Position>
 ) : ViewModelI() {
+    private val useCase = GameAnalyzeUseCase()
 
-    override val data = GameAnalyzeData(pos)
+    /**
+     * depth of the analysis
+     */
+    val depth: MutableState<Int> = useCase.depthValue
 
-    private val _uiState: MutableStateFlow<GameAnalyzeUiState> =
-        MutableStateFlow(GameAnalyzeUiState(mutableListOf(), data.dataState.value.depth))
-
-    @Suppress("UndocumentedPublicProperty")
-    val uiState: StateFlow<GameAnalyzeUiState>
-        get() = _uiState
-
-    init {
-        viewModelScope.launch {
-            data.dataState
-                .collect { (positions, depth) ->
-                    _uiState.value =
-                        GameAnalyzeUiState(positions.toPositions(data.pos.value), depth)
-                }
-        }
-    }
+    /**
+     * positions produced by the analysis
+     */
+    val positions: MutableState<List<Position>> = mutableStateOf(listOf())
 
     /**
      * quick access function
      */
     fun increaseDepth() {
-        data.increaseDepth()
+        useCase.increaseDepth()
     }
 
     /**
      * quick access function
      */
     fun decreaseDepth() {
-        data.decreaseDepth()
+        useCase.decreaseDepth()
     }
 
     /**
      * quick access function
      */
     fun startAnalyze() {
-        data.startAnalyze()
+        useCase.startAnalyze(pos.value)
+    }
+
+    init {
+        viewModelScope.launch {
+            useCase.movementsValue.collect {
+                positions.value = it.toPositions(pos.value)
+            }
+        }
     }
 }
-
-/**
- * ui state of the game analyze screen
- */
-class GameAnalyzeUiState(
-    /**
-     * currently analyzed position
-     */
-    val positions: List<Position>,
-    /**
-     * current analyze depth
-     */
-    val depth: Int
-)

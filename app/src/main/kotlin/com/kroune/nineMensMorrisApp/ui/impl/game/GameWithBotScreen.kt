@@ -1,28 +1,34 @@
 package com.kroune.nineMensMorrisApp.ui.impl.game
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavHostController
 import com.kroune.nineMensMorrisApp.common.AppTheme
-import com.kroune.nineMensMorrisApp.ui.interfaces.ScreenModelI
-import com.kroune.nineMensMorrisApp.viewModel.impl.game.GameWithBotViewModel
+import com.kroune.nineMensMorrisLib.Position
 
 /**
- * Game main screen
+ * renders game with bot screen
  */
-class GameWithBotScreen(
-    navController: NavHostController
-) : ScreenModelI {
-
-    @Composable
-    override fun InvokeRender() {
-        AppTheme {
-            viewModel.gameBoard.let {
-                it.RenderPieceCount()
-                it.InvokeRender()
-                it.RenderUndoRedo()
-            }
-        }
+@Composable
+fun RenderGameWithBotScreen(
+    pos: Position,
+    selectedButton: Int?,
+    moveHints: List<Int>,
+    onClick: (Int) -> Unit,
+    handleUndo: () -> Unit,
+    handleRedo: () -> Unit
+) {
+    AppTheme {
+        RenderGameBoard(
+            pos = pos,
+            selectedButton = selectedButton,
+            moveHints = moveHints,
+            onClick = onClick
+        )
+        RenderPieceCount(
+            pos = pos
+        )
+        RenderUndoRedo(
+            handleUndo = handleUndo,
+            handleRedo = handleRedo
+        )
     }
-
-    override val viewModel = GameWithBotViewModel(navController)
 }

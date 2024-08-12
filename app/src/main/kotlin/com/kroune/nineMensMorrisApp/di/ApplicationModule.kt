@@ -7,10 +7,9 @@ import com.kroune.nineMensMorrisApp.data.remote.account.AccountInfoRepositoryI
 import com.kroune.nineMensMorrisApp.data.remote.account.AccountInfoRepositoryImpl
 import com.kroune.nineMensMorrisApp.data.remote.auth.AuthRepositoryI
 import com.kroune.nineMensMorrisApp.data.remote.auth.AuthRepositoryImpl
-import com.kroune.nineMensMorrisApp.data.remote.game.GameRepositoryImpl
 import com.kroune.nineMensMorrisApp.data.remote.game.GameRepositoryI
-import com.kroune.nineMensMorrisApp.ui.impl.auth.SignInScreen
-import com.kroune.nineMensMorrisApp.ui.impl.auth.ViewAccountScreen
+import com.kroune.nineMensMorrisApp.data.remote.game.GameRepositoryImpl
+import com.kroune.nineMensMorrisApp.viewModel.impl.auth.SignInViewModel
 import com.kroune.nineMensMorrisApp.viewModel.impl.auth.ViewAccountViewModel
 import com.kroune.nineMensMorrisApp.viewModel.impl.game.OnlineGameViewModel
 import dagger.Module

@@ -16,13 +16,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
-import com.kroune.nineMensMorrisApp.ui.impl.tutorial.domain.FlyingMovesTutorialScreen
-import com.kroune.nineMensMorrisApp.ui.impl.tutorial.domain.IndicatorsTutorialScreen
-import com.kroune.nineMensMorrisApp.ui.impl.tutorial.domain.LoseTutorialScreen
-import com.kroune.nineMensMorrisApp.ui.impl.tutorial.domain.NormalMovesTutorialScreen
-import com.kroune.nineMensMorrisApp.ui.impl.tutorial.domain.PlacementTutorialScreen
-import com.kroune.nineMensMorrisApp.ui.impl.tutorial.domain.RemovalMovesTutorialScreen
-import com.kroune.nineMensMorrisApp.ui.impl.tutorial.domain.TriplesTutorialScreen
+import com.kroune.nineMensMorrisApp.ui.impl.tutorial.domain.RenderFlyingMovesTutorialScreen
+import com.kroune.nineMensMorrisApp.ui.impl.tutorial.domain.RenderIndicatorsTutorialScreen
+import com.kroune.nineMensMorrisApp.ui.impl.tutorial.domain.RenderLoseTutorialScreen
+import com.kroune.nineMensMorrisApp.ui.impl.tutorial.domain.RenderNormalMovesTutorialScreen
+import com.kroune.nineMensMorrisApp.ui.impl.tutorial.domain.RenderPlacementTutorialScreen
+import com.kroune.nineMensMorrisApp.ui.impl.tutorial.domain.RenderRemovalMovesTutorialScreen
+import com.kroune.nineMensMorrisApp.ui.impl.tutorial.domain.RenderTriplesTutorialScreen
 import com.kroune.nineMensMorrisApp.ui.interfaces.ScreenModelI
 import kotlinx.coroutines.launch
 
@@ -35,14 +35,28 @@ class TutorialScreen(
     /**
      * stores order of tutorials (used for slider)
      */
-    private val tutorialScreens = listOf(
-        IndicatorsTutorialScreen(resources),
-        LoseTutorialScreen(resources),
-        PlacementTutorialScreen(resources),
-        NormalMovesTutorialScreen(resources),
-        FlyingMovesTutorialScreen(resources),
-        TriplesTutorialScreen(resources),
-        RemovalMovesTutorialScreen(resources)
+    private val tutorialScreens: List<@Composable () -> Unit> = listOf(
+        {
+            RenderIndicatorsTutorialScreen(resources)
+        },
+        {
+            RenderLoseTutorialScreen(resources)
+        },
+        {
+            RenderPlacementTutorialScreen(resources)
+        },
+        {
+            RenderNormalMovesTutorialScreen(resources)
+        },
+        {
+            RenderFlyingMovesTutorialScreen(resources)
+        },
+        {
+            RenderTriplesTutorialScreen(resources)
+        },
+        {
+            RenderRemovalMovesTutorialScreen(resources)
+        }
     )
 
     /**
@@ -92,7 +106,7 @@ class TutorialScreen(
                         .height(height.dp)
                         .width(width.dp)
                 ) {
-                    tutorialScreens[it].InvokeRender()
+                    tutorialScreens[it]()
                 }
             }
         }

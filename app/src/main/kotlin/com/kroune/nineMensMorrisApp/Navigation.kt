@@ -2,7 +2,7 @@ package com.kroune.nineMensMorrisApp
 
 import android.os.Bundle
 import androidx.navigation.NavType
-import com.kr8ne.mensMorris.Position
+import com.kroune.nineMensMorrisLib.Position
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

@@ -27,6 +27,7 @@ class SearchingForGameViewModel @Inject constructor(
     val gameId = MutableStateFlow<Long?>(null)
 
     init {
+        println("init")
         CoroutineScope(Dispatchers.IO).launch {
             while (true) {
                 val oldGameId =

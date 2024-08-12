@@ -1,5 +1,6 @@
 package com.kroune.nineMensMorrisApp.viewModel.impl.auth
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.kroune.nineMensMorrisApp.data.remote.Common.networkScope
@@ -9,7 +10,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -56,22 +56,22 @@ class ViewAccountViewModel @AssistedInject constructor(
     /**
      * account name or null if it is still loading
      */
-    val accountName = MutableStateFlow<String?>(null)
+    val accountName = mutableStateOf<String?>(null)
 
     /**
      * file with account picture or null if it is still loading
      */
-    val pictureByteArray = MutableStateFlow<ByteArray?>(null)
+    val pictureByteArray = mutableStateOf<ByteArray?>(null)
 
     /**
      * account creation date or null if it is still loading
      */
-    val accountCreationDate = MutableStateFlow<String?>(null)
+    val accountCreationDate = mutableStateOf<String?>(null)
 
     /**
      * account rating or null if it is still loading
      */
-    val accountRating = MutableStateFlow<Long?>(null)
+    val accountRating = mutableStateOf<Long?>(null)
 
     /**
      * updates [accountRating]
