@@ -38,7 +38,7 @@ class WelcomeViewModel @Inject constructor(
     suspend fun checkJwtToken(): Result<Boolean> {
         return runCatching {
             val jwtToken =
-                accountInfoRepositoryI.jwtTokenState.value ?: error("no jwt token was provided")
+                accountInfoRepositoryI.jwtTokenState.value ?: return@runCatching false
             return authRepositoryI.checkJwtToken(jwtToken)
         }.onFailure {
             println("error checking jwt token")

@@ -69,7 +69,6 @@ class OnlineGameViewModel @AssistedInject constructor(
 
     private suspend fun DefaultClientWebSocketSession.get(): String {
         val text = (incoming.receive() as Frame.Text).readText()
-        println("DEBUG: $text")
         return text
     }
 
@@ -170,6 +169,7 @@ class OnlineGameViewModel @AssistedInject constructor(
     private fun GameBoardUseCase.response(index: Int) {
         // check if we can make this move
         if (isGreen.value == gameBoard.pos.value.pieceToMove) {
+            val move = gameBoard.getMovement(index)
             handleClick(index)
             if (gameBoard.pos.value.pieceToMove == isGreen.value) {
                 handleHighLighting()
@@ -177,8 +177,8 @@ class OnlineGameViewModel @AssistedInject constructor(
                 // we can't make any move if it isn't our move
                 gameBoard.moveHints.clear()
             }
-            gameBoard.getMovement(index)?.let {
-                viewModelScope.launch {
+            move?.let {
+                CoroutineScope(Dispatchers.IO).launch {
                     val string = Json.encodeToString<Movement>(it)
                     // post our move
                     session!!.send(string)

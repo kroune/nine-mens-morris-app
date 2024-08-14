@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
                     val vm: WelcomeViewModel = hiltViewModel()
                     RenderWelcomeScreen(
                         accountId = vm.accountId.value,
-                        checkJwtToken = suspend { vm.checkJwtToken().getOrThrow() },
+                        checkJwtToken = suspend { vm.checkJwtToken() },
                         hasJwtToken = { vm.hasJwtToken() },
                         resources = resources,
                         navController = navController
@@ -140,9 +140,17 @@ class MainActivity : ComponentActivity() {
                     val vm: SignUpViewModel = hiltViewModel()
                     if (vm.authResult.value is AuthResults.Success) {
                         if (nextRoute is Navigation.ViewAccount) {
-                            navController.navigateSingleTopTo(Navigation.ViewAccount(vm.accountId!!))
+                            navController.navigateSingleTopTo(Navigation.ViewAccount(vm.accountId!!)) {
+                                popUpTo(Navigation.SignUp(nextRoute)) {
+                                    inclusive = true
+                                }
+                            }
                         } else {
-                            navController.navigateSingleTopTo(nextRoute)
+                            navController.navigateSingleTopTo(nextRoute) {
+                                popUpTo(Navigation.SignUp(nextRoute)) {
+                                    inclusive = true
+                                }
+                            }
                         }
                     }
                     RenderSignUpScreen(
@@ -170,9 +178,17 @@ class MainActivity : ComponentActivity() {
                     val vm: SignInViewModel = hiltViewModel()
                     if (vm.authResult.value is AuthResults.Success) {
                         if (nextRoute is Navigation.ViewAccount) {
-                            navController.navigateSingleTopTo(Navigation.ViewAccount(vm.accountId!!))
+                            navController.navigateSingleTopTo(Navigation.ViewAccount(vm.accountId!!)) {
+                                popUpTo(Navigation.SignIn(nextRoute)) {
+                                    inclusive = true
+                                }
+                            }
                         } else {
-                            navController.navigateSingleTopTo(nextRoute)
+                            navController.navigateSingleTopTo(nextRoute) {
+                                popUpTo(Navigation.SignIn(nextRoute)) {
+                                    inclusive = true
+                                }
+                            }
                         }
                     }
                     RenderSignInScreen(

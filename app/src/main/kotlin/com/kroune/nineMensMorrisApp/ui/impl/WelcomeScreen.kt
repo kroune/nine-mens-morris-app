@@ -70,7 +70,7 @@ private var hasSeen = StorageManager.getBoolean("hasSeenTutorial", false)
 @Composable
 fun RenderWelcomeScreen(
     accountId: Long?,
-    checkJwtToken: suspend () -> Boolean,
+    checkJwtToken: suspend () -> Result<Boolean>,
     hasJwtToken: () -> Boolean,
     resources: Resources,
     navController: NavHostController
@@ -142,7 +142,7 @@ private fun RenderMainScreen(
     playOnlineGameOverlay: MutableState<Boolean>,
     viewAccountDataLoadingOverlay: MutableState<Boolean>,
     hasJwtToken: () -> Boolean,
-    checkJwtToken: suspend () -> Boolean
+    checkJwtToken: suspend () -> Result<Boolean>
 ) {
     val width = LocalConfiguration.current.screenWidthDp
     val height = LocalConfiguration.current.screenHeightDp
@@ -186,7 +186,7 @@ private fun RenderMainScreen(
                 onClick = {
                     playOnlineGameOverlay.value = true
                     CoroutineScope(Dispatchers.IO).launch {
-                        if (checkJwtToken() == true) {
+                        if (checkJwtToken().getOrNull() == true) {
                             withContext(Dispatchers.Main) {
                                 navController?.navigateSingleTopTo(Navigation.SearchingOnlineGame)
                             }
