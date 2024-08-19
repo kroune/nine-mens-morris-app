@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -215,12 +216,14 @@ fun NavHost(context: Context) {
             SearchingForGameScreen(expectedWaitingTime, context.resources)
         }
         composable<Navigation.OnlineGame> {
+            val vm: OnlineGameViewModel = hiltViewModel()
             val gameId = remember {
                 it.toRoute<Navigation.OnlineGame>().id
             }
-            val vm: OnlineGameViewModel = hiltViewModel()
-            vm.setVariables(gameId)
-            vm.init()
+            LaunchedEffect(Unit) {
+                vm.setVariables(gameId)
+                vm.init()
+            }
             if (vm.gameEnded.value) {
                 navController.navigateSingleTopTo(
                     Navigation.GameEnd(
