@@ -18,7 +18,15 @@ class SearchingForGameViewModel @Inject constructor(
     private val searchingForGameUseCase =
         SearchingForGameUseCase(accountInfoRepository, gameRepository)
 
+    /**
+     * game id
+     */
     val gameId = searchingForGameUseCase.gameId
+
+    /**
+     * expected time to wait
+     * calculated on the server
+     */
     val expectedWaitingTime = searchingForGameUseCase.expectedWaitingTime
 
     init {

@@ -54,6 +54,10 @@ sealed class Navigation {
     data object SearchingOnlineGame : Navigation()
 }
 
+/**
+ * custom nav type for position list
+ * used for "type safe compose navigation"
+ */
 class ListPositionNavType : NavType<List<Position>>(false) {
     override fun serializeAsValue(value: List<Position>): String {
         return Json.encodeToString(value)

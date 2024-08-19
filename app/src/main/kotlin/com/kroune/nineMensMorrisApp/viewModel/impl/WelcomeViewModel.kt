@@ -18,6 +18,9 @@ class WelcomeViewModel @Inject constructor(
     private val accountInfoRepositoryI: AccountInfoRepositoryI
 ) : ViewModelI() {
 
+    /**
+     * if user has seen tutorial pop up
+     */
     var hasSeen = StorageManager.getBoolean("hasSeenTutorial", false)
         set(value) {
             if (field != value) {

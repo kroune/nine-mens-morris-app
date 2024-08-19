@@ -33,7 +33,10 @@ class GameWithBotViewModel(
         }
     )
 
-    val movesHistory = gameBoard.movesHistory
+    /**
+     * Returns the history of moves made in the game.
+     */
+    val movesHistory: List<Position> = gameBoard.movesHistory
 
     /**
      * performs needed actions after click

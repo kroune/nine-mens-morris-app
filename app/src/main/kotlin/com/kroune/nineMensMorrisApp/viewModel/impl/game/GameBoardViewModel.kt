@@ -79,7 +79,10 @@ class GameBoardViewModel(
         onGameEnd
     )
 
-    val moveHints = useCase.moveHints
+    /**
+     * Retrieves the list of indices of pieces that can be moved (used for highlighting).
+     */
+    val moveHints: MutableState<List<Int>> = useCase.moveHints
 
     /**
      * quick access
@@ -88,6 +91,9 @@ class GameBoardViewModel(
         return useCase.handleClick(index)
     }
 
+    /**
+     * history of player moves
+     */
     val movesHistory = useCase.movesHistory
 
     /**

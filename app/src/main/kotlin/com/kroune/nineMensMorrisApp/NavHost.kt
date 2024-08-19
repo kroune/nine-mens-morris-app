@@ -37,6 +37,9 @@ import com.kroune.nineMensMorrisApp.viewModel.impl.game.SearchingForGameViewMode
 import com.kroune.nineMensMorrisLib.Position
 import kotlin.reflect.typeOf
 
+/**
+ * Compose navigation happens here
+ */
 @Composable
 fun NavHost(context: Context) {
     val navController = rememberNavController()
@@ -243,7 +246,7 @@ fun NavHost(context: Context) {
                 handleRedo = { },
                 onGiveUp = { vm.giveUp() },
                 gameEnded = vm.gameEnded.value,
-                isGreen = vm.isGreen.value,
+                isGreen = vm.movesFirst.value,
                 navController = navController
             )
         }

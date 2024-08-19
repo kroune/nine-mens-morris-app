@@ -34,7 +34,10 @@ class GameWithFriendViewModel(
      */
     val selectedButton: MutableState<Int?> = gameBoardViewModel.selectedButton
 
-    val movesHistory = gameBoardViewModel.movesHistory
+    /**
+     * Returns the history of moves made in the game.
+     */
+    val movesHistory: List<Position> = gameBoardViewModel.movesHistory
 
     /**
      * hints of possible moves

@@ -9,9 +9,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 
+/**
+ * searching for game use case
+ */
 class SearchingForGameUseCase(
-    val accountInfoRepository: AccountInfoRepositoryI,
-    val gameRepository: GameRepositoryI
+    private val accountInfoRepository: AccountInfoRepositoryI,
+    private val gameRepository: GameRepositoryI
 ) {
     /**
      * id of the game
@@ -19,12 +22,18 @@ class SearchingForGameUseCase(
      */
     val gameId = mutableStateOf<Long?>(null)
 
+    /**
+     * expected time to wait, before finding a game
+     */
     val expectedWaitingTime: MutableState<Long?> = mutableStateOf(null)
 
     private suspend fun getCurrentGameId(): Long? {
         return gameRepository.isPlaying(accountInfoRepository.jwtTokenState.value!!).getOrNull()
     }
 
+    /**
+     * performs search for game
+     */
     fun searchForGame() {
         CoroutineScope(Dispatchers.IO).launch {
             while (true) {

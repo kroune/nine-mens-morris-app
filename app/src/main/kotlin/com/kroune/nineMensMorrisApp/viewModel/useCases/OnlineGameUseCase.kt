@@ -6,7 +6,6 @@ import com.kroune.nineMensMorrisApp.common.SERVER_ADDRESS
 import com.kroune.nineMensMorrisApp.common.USER_API
 import com.kroune.nineMensMorrisApp.data.remote.Common.network
 import com.kroune.nineMensMorrisApp.data.remote.account.AccountInfoRepositoryI
-import com.kroune.nineMensMorrisApp.data.remote.game.GameRepositoryI
 import com.kroune.nineMensMorrisApp.viewModel.impl.game.GameBoardViewModel
 import com.kroune.nineMensMorrisLib.Position
 import com.kroune.nineMensMorrisLib.gameStartPosition
@@ -27,15 +26,20 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+/**
+ * online game use case
+ */
 class OnlineGameUseCase(
-    val accountInfoRepository: AccountInfoRepositoryI,
-    val gameRepository: GameRepositoryI
+    private val accountInfoRepository: AccountInfoRepositoryI
 ) {
     /**
      * our web socket session
      */
     private var session: DefaultClientWebSocketSession? = null
 
+    /**
+     * switches to [Dispatchers.IO] and makes sure to cancel previous job
+     */
     fun createGameConnection(gameId: Long) {
         gameJob?.cancel()
         gameJob = CoroutineScope(Dispatchers.IO).launch {
@@ -46,12 +50,11 @@ class OnlineGameUseCase(
     private suspend fun exceptionHandler(gameId: Long) {
         try {
             connection(gameId)
+        } catch (_: ClosedReceiveChannelException) {
+            return
         } catch (e: Exception) {
             println("error accessing playing game")
             e.printStackTrace()
-            if (e is ClosedReceiveChannelException) {
-                return
-            }
             delay(2000)
             exceptionHandler(gameId)
         }
