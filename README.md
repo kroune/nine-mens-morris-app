@@ -7,7 +7,7 @@
 
 This project follows MVVM (Model - View - ViewModel) model
 
-##Libraries used in project
+## Libraries used in project
 - ktor
 - jetpack compose
 - jetpack compose navigation
