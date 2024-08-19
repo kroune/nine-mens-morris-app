@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import com.kroune.nineMensMorrisApp.Navigation
-import com.kroune.nineMensMorrisApp.common.AppTheme
 import com.kroune.nineMensMorrisApp.navigateSingleTopTo
 import com.kroune.nineMensMorrisLib.Position
 
@@ -35,55 +34,48 @@ fun RenderOnlineGameScreen(
     isGreen: Boolean?,
     navController: NavHostController
 ) {
-    if (gameEnded) {
-        navController.navigateSingleTopTo(
-            Navigation.GameEnd(pos)
+    if (displayGiveUpConfirmation.value) {
+        GiveUpConfirm(
+            giveUp = {
+                onGiveUp()
+            },
+            navController = navController
         )
     }
-    AppTheme {
-        if (displayGiveUpConfirmation.value) {
-            GiveUpConfirm(
-                giveUp = {
-                    onGiveUp()
-                },
-                navController = navController
-            )
+    if (!gameEnded) {
+        BackHandler {
+            displayGiveUpConfirmation.value = true
         }
-        if (!gameEnded) {
-            BackHandler {
-                displayGiveUpConfirmation.value = true
-            }
+    }
+    RenderPieceCount(
+        pos = pos
+    )
+    RenderGameBoard(
+        pos = pos,
+        selectedButton = selectedButton,
+        moveHints = moveHints,
+        onClick = onClick
+    )
+    RenderUndoRedo(
+        handleUndo = {
+            handleUndo()
+        },
+        handleRedo = {
+            handleRedo()
         }
-        RenderPieceCount(
-            pos = pos
-        )
-        RenderGameBoard(
-            pos = pos,
-            selectedButton = selectedButton,
-            moveHints = moveHints,
-            onClick = onClick
-        )
-        RenderUndoRedo(
-            handleUndo = {
-                handleUndo()
-            },
-            handleRedo = {
-                handleRedo()
+    )
+    Column {
+        when (isGreen) {
+            true -> {
+                Text("You are green")
             }
-        )
-        Column {
-            when (isGreen) {
-                true -> {
-                    Text("You are green")
-                }
 
-                false -> {
-                    Text("You are blue")
-                }
+            false -> {
+                Text("You are blue")
+            }
 
-                null -> {
-                    Text("Waiting for server info")
-                }
+            null -> {
+                Text("Waiting for server info")
             }
         }
     }

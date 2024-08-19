@@ -1,5 +1,6 @@
 package com.kroune.nineMensMorrisApp.viewModel.impl
 
+import com.kroune.nineMensMorrisApp.StorageManager
 import com.kroune.nineMensMorrisApp.data.remote.account.AccountInfoRepositoryI
 import com.kroune.nineMensMorrisApp.data.remote.auth.AuthRepositoryI
 import com.kroune.nineMensMorrisApp.viewModel.interfaces.ViewModelI
@@ -16,6 +17,14 @@ class WelcomeViewModel @Inject constructor(
     private val authRepositoryI: AuthRepositoryI,
     private val accountInfoRepositoryI: AccountInfoRepositoryI
 ) : ViewModelI() {
+
+    var hasSeen = StorageManager.getBoolean("hasSeenTutorial", false)
+        set(value) {
+            if (field != value) {
+                StorageManager.putBoolean("hasSeenTutorial", value)
+                field = value
+            }
+        }
 
     /**
      * state flow of the account id

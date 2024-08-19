@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.kroune.nineMensMorrisApp.Navigation
 import com.kroune.nineMensMorrisApp.R
-import com.kroune.nineMensMorrisApp.common.AppTheme
 import com.kroune.nineMensMorrisApp.data.remote.AuthResults
 import com.kroune.nineMensMorrisApp.data.remote.Common.networkScope
 import com.kroune.nineMensMorrisApp.navigateSingleTopTo
@@ -48,114 +47,112 @@ fun RenderSignInScreen(
     val requestInProcess = remember { mutableStateOf(false) }
     val isUsernameValid = remember { mutableStateOf(false) }
     val username = remember { mutableStateOf("") }
-    AppTheme {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            when (authResult) {
-                is AuthResults.Failure -> {
-                    Text(
-                        text = resources.getString(authResult.stringId),
-                        color = Color.Red,
-                        fontSize = 12.sp
-                    )
-                }
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        when (authResult) {
+            is AuthResults.Failure -> {
+                Text(
+                    text = resources.getString(authResult.stringId),
+                    color = Color.Red,
+                    fontSize = 12.sp
+                )
+            }
 
-                is AuthResults.Success -> {
-                    Text(
-                        text = resources.getString(R.string.switching_to_next_screen),
-                        color = Color.Red,
-                        fontSize = 12.sp
-                    )
-                }
+            is AuthResults.Success -> {
+                Text(
+                    text = resources.getString(R.string.switching_to_next_screen),
+                    color = Color.Red,
+                    fontSize = 12.sp
+                )
+            }
 
-                null -> {
-                }
+            null -> {
             }
-            Spacer(modifier = Modifier.fillMaxHeight(0.3f))
-            TextField(
-                value = username.value,
-                onValueChange = { newValue ->
-                    username.value = newValue
-                    isUsernameValid.value = loginValidator(username.value)
-                },
-                label = {
-                    if (!isUsernameValid.value) {
-                        Text(
-                            resources.getString(R.string.invalid_login),
-                            modifier = Modifier,
-                            color = Color.Red,
-                            fontSize = 12.sp
-                        )
-                    }
-                },
-                placeholder = {
-                    Text(resources.getString(R.string.username))
-                },
-                leadingIcon = {
-                    Icon(painter = painterResource(id = R.drawable.username), null)
-                }
-            )
-            Spacer(modifier = Modifier.fillMaxHeight(0.05f))
-            val isPasswordValid = remember { mutableStateOf(false) }
-            val password = remember { mutableStateOf("") }
-            TextField(
-                password.value,
-                { newValue ->
-                    password.value = newValue
-                    isPasswordValid.value = passwordValidator(password.value)
-                },
-                label = {
-                    if (!isPasswordValid.value) {
-                        Text(
-                            resources.getString(R.string.invalid_password),
-                            modifier = Modifier,
-                            color = Color.Red,
-                            fontSize = 12.sp
-                        )
-                    }
-                },
-                placeholder = { Text(resources.getString(R.string.password)) },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.password), null
-                    )
-                }
-            )
-            Spacer(modifier = Modifier.fillMaxHeight(0.1f))
-            Button(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                onClick = {
-                    requestInProcess.value = true
-                    CoroutineScope(networkScope).launch {
-                        onLogin(username.value, password.value)
-                        requestInProcess.value = false
-                    }
-                },
-                enabled = isUsernameValid.value && isPasswordValid.value && !requestInProcess.value
-            ) {
-                Text(resources.getString(R.string.sign_in))
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.BottomCenter
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(resources.getString(R.string.no_account_question))
-                    TextButton(modifier = Modifier, onClick = {
-                        navController?.navigateSingleTopTo(Navigation.SignUp(nextRoute))
-                    }) {
-                        Text(resources.getString(R.string.sign_up), color = Color.Blue)
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.fillMaxHeight(0.1f))
         }
+        Spacer(modifier = Modifier.fillMaxHeight(0.3f))
+        TextField(
+            value = username.value,
+            onValueChange = { newValue ->
+                username.value = newValue
+                isUsernameValid.value = loginValidator(username.value)
+            },
+            label = {
+                if (!isUsernameValid.value) {
+                    Text(
+                        resources.getString(R.string.invalid_login),
+                        modifier = Modifier,
+                        color = Color.Red,
+                        fontSize = 12.sp
+                    )
+                }
+            },
+            placeholder = {
+                Text(resources.getString(R.string.username))
+            },
+            leadingIcon = {
+                Icon(painter = painterResource(id = R.drawable.username), null)
+            }
+        )
+        Spacer(modifier = Modifier.fillMaxHeight(0.05f))
+        val isPasswordValid = remember { mutableStateOf(false) }
+        val password = remember { mutableStateOf("") }
+        TextField(
+            password.value,
+            { newValue ->
+                password.value = newValue
+                isPasswordValid.value = passwordValidator(password.value)
+            },
+            label = {
+                if (!isPasswordValid.value) {
+                    Text(
+                        resources.getString(R.string.invalid_password),
+                        modifier = Modifier,
+                        color = Color.Red,
+                        fontSize = 12.sp
+                    )
+                }
+            },
+            placeholder = { Text(resources.getString(R.string.password)) },
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.password), null
+                )
+            }
+        )
+        Spacer(modifier = Modifier.fillMaxHeight(0.1f))
+        Button(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            onClick = {
+                requestInProcess.value = true
+                CoroutineScope(networkScope).launch {
+                    onLogin(username.value, password.value)
+                    requestInProcess.value = false
+                }
+            },
+            enabled = isUsernameValid.value && isPasswordValid.value && !requestInProcess.value
+        ) {
+            Text(resources.getString(R.string.sign_in))
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(resources.getString(R.string.no_account_question))
+                TextButton(modifier = Modifier, onClick = {
+                    navController?.navigateSingleTopTo(Navigation.SignUp(nextRoute))
+                }) {
+                    Text(resources.getString(R.string.sign_up), color = Color.Blue)
+                }
+            }
+        }
+        Spacer(modifier = Modifier.fillMaxHeight(0.1f))
     }
 }

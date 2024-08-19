@@ -1,7 +1,6 @@
 package com.kroune.nineMensMorrisApp.ui.impl.game
 
 import androidx.compose.runtime.Composable
-import com.kroune.nineMensMorrisApp.common.AppTheme
 import com.kroune.nineMensMorrisLib.Position
 
 /**
@@ -16,19 +15,17 @@ fun RenderGameWithBotScreen(
     handleUndo: () -> Unit,
     handleRedo: () -> Unit
 ) {
-    AppTheme {
-        RenderGameBoard(
-            pos = pos,
-            selectedButton = selectedButton,
-            moveHints = moveHints,
-            onClick = onClick
-        )
-        RenderPieceCount(
-            pos = pos
-        )
-        RenderUndoRedo(
-            handleUndo = handleUndo,
-            handleRedo = handleRedo
-        )
-    }
+    RenderGameBoard(
+        pos = pos,
+        selectedButton = selectedButton,
+        moveHints = moveHints,
+        onClick = onClick
+    )
+    RenderPieceCount(
+        pos = pos
+    )
+    RenderUndoRedo(
+        handleUndo = handleUndo,
+        handleRedo = handleRedo
+    )
 }

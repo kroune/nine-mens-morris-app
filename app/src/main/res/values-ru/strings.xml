@@ -35,4 +35,5 @@
     <string name="auth_app_error">Неопознанная ошибка. Либо версия приложения устарела, либо что-то серьезное сломалось</string>
     <string name="auth_no_account_found">Аккаунт с таким логином + паролем не был найден</string>
     <string name="auth_server_error">Ошибка сервера, должно быть, произошло что-то очень плохое. Сообщите об этой ошибке на github</string>
+    <string name="game_expected_waiting_time">предположительное время ожидания:</string>
 </resources>

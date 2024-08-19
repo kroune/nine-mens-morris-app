@@ -79,7 +79,12 @@ class AuthRepositoryImpl @Inject constructor() : AuthRepositoryI {
                     parameters["jwtToken"] = jwtToken
                 }
             }
-            Json.decodeFromString<Boolean>(result.bodyAsText())
+            if (result.status.isSuccess()) {
+                Json.decodeFromString<Boolean>(result.bodyAsText())
+            } else {
+                println("checking jwt token failed ${result.status.value} ${result.bodyAsText()}")
+                throw ClientNetworkException(result.status.value, result.bodyAsText())
+            }
         }.onFailure {
             println("error checking jwt token")
             it.printStackTrace()

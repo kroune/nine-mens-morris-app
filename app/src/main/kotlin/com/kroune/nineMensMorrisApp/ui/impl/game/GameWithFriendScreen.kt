@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.kroune.nineMensMorrisApp.BUTTON_WIDTH
-import com.kroune.nineMensMorrisApp.common.AppTheme
 import com.kroune.nineMensMorrisLib.Position
 
 /**
@@ -30,30 +29,28 @@ fun RenderGameWithFriendScreen(
     decreaseDepth: () -> Unit,
     startAnalyze: () -> Unit,
 ) {
-    AppTheme {
-        RenderGameBoard(
-            pos = pos,
-            selectedButton = selectedButton,
-            moveHints = moveHints,
-            onClick = {
-                onClick(it)
-            }
-        )
-        RenderPieceCount(pos = pos)
-        RenderUndoRedo(handleUndo = handleUndo, handleRedo = handleRedo)
-        Box(
-            modifier = Modifier
-                .padding(0.dp, BUTTON_WIDTH * 9.5f, 0.dp, 0.dp)
-                .height(IntrinsicSize.Max)
-                .fillMaxWidth()
-        ) {
-            RenderGameAnalyzeScreen(
-                positions = positions,
-                depth = depth,
-                startAnalyze = { startAnalyze() },
-                increaseDepth = { increaseDepth() },
-                decreaseDepth = { decreaseDepth() }
-            )
+    RenderGameBoard(
+        pos = pos,
+        selectedButton = selectedButton,
+        moveHints = moveHints,
+        onClick = {
+            onClick(it)
         }
+    )
+    RenderPieceCount(pos = pos)
+    RenderUndoRedo(handleUndo = handleUndo, handleRedo = handleRedo)
+    Box(
+        modifier = Modifier
+            .padding(0.dp, BUTTON_WIDTH * 9.5f, 0.dp, 0.dp)
+            .height(IntrinsicSize.Max)
+            .fillMaxWidth()
+    ) {
+        RenderGameAnalyzeScreen(
+            positions = positions,
+            depth = depth,
+            startAnalyze = { startAnalyze() },
+            increaseDepth = { increaseDepth() },
+            decreaseDepth = { decreaseDepth() }
+        )
     }
 }

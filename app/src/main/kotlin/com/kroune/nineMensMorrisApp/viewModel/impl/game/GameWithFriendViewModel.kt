@@ -34,10 +34,12 @@ class GameWithFriendViewModel(
      */
     val selectedButton: MutableState<Int?> = gameBoardViewModel.selectedButton
 
+    val movesHistory = gameBoardViewModel.movesHistory
+
     /**
      * hints of possible moves
      */
-    val moveHints: List<Int> = gameBoardViewModel.moveHints
+    val moveHints: MutableState<List<Int>> = gameBoardViewModel.moveHints
 
     /**
      * responds to the click
