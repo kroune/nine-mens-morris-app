@@ -1,18 +1,37 @@
 package com.kroune.nineMensMorrisApp.ui.impl.game
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.kroune.nineMensMorrisApp.Navigation
+import com.kroune.nineMensMorrisApp.R
 import com.kroune.nineMensMorrisApp.common.AppTheme
 import com.kroune.nineMensMorrisApp.navigateSingleTopTo
 import com.kroune.nineMensMorrisLib.Position
@@ -41,51 +60,57 @@ fun RenderOnlineGameScreen(
         )
     }
     AppTheme {
-        if (displayGiveUpConfirmation.value) {
-            GiveUpConfirm(
-                giveUp = {
-                    onGiveUp()
-                },
-                navController = navController
+        Column() {
+
+            PlayersUI()
+
+            if (displayGiveUpConfirmation.value) {
+                GiveUpConfirm(
+                    giveUp = {
+                        onGiveUp()
+                    },
+                    navController = navController
+                )
+            }
+            if (!gameEnded) {
+                BackHandler {
+                    displayGiveUpConfirmation.value = true
+                }
+            }
+            RenderPieceCount(
+                pos = pos
             )
-        }
-        if (!gameEnded) {
-            BackHandler {
-                displayGiveUpConfirmation.value = true
-            }
-        }
-        RenderPieceCount(
-            pos = pos
-        )
-        RenderGameBoard(
-            pos = pos,
-            selectedButton = selectedButton,
-            moveHints = moveHints,
-            onClick = onClick
-        )
-        RenderUndoRedo(
-            handleUndo = {
-                handleUndo()
-            },
-            handleRedo = {
-                handleRedo()
-            }
-        )
-        Column {
-            when (isGreen) {
-                true -> {
-                    Text("You are green")
+            RenderGameBoard(
+                pos = pos,
+                selectedButton = selectedButton,
+                moveHints = moveHints,
+                onClick = onClick
+            )
+            RenderUndoRedo(
+                handleUndo = {
+                    handleUndo()
+                },
+                handleRedo = {
+                    handleRedo()
                 }
+            )
+            Column {
+                when (isGreen) {
+                    true -> {
+                        Text("You are green")
+                    }
 
-                false -> {
-                    Text("You are blue")
-                }
+                    false -> {
+                        Text("You are blue")
+                    }
 
-                null -> {
-                    Text("Waiting for server info")
+                    null -> {
+                        Text("Waiting for server info")
+                    }
                 }
             }
         }
+
     }
 }
 
@@ -115,5 +140,97 @@ private fun GiveUpConfirm(
                 Text("No")
             }
         }
+    }
+}
+
+@Composable
+fun TurnTimerUI() {
+    Box(
+        modifier = Modifier
+            .padding(16.dp)
+            .border(2.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+            .padding(8.dp)
+    ) {
+        Text(
+            text = "Time left: 20 s",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.DarkGray
+        )
+    }
+}
+
+@Composable
+fun PlayerCard(
+    playerName: String,
+    avatarRes: Int,
+    chipColor: Color,
+    rating: Int,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
+            .padding(8.dp)
+    ) {
+        Image(
+            painter = painterResource(id = avatarRes),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(40.dp)
+                .background(Color.Gray, shape = CircleShape)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Column(
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(text = playerName, fontSize = 16.sp)
+            Spacer(modifier = Modifier.height(4.dp))
+            Box(
+                modifier = Modifier
+                    .size(16.dp)
+                    .background(chipColor, shape = CircleShape)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = "Rating: $rating", fontSize = 14.sp, color = Color.Gray)
+        }
+    }
+}
+
+@Composable
+fun PlayersUI() {
+//    val uiState = viewModel.gameBoard.pos.collectAsState().value //экземпляр состояния доски из VM
+    //где pos - это позиции фишек, в классе Position, и там же счётчик с колличеством
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            PlayerCard(
+                playerName = "Player 1",
+                avatarRes = R.drawable.pv,
+                chipColor = Color.Green,
+                rating = 123,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            PlayerCard(
+                playerName = "Player 2",
+                avatarRes = R.drawable.chert_risunok_26,
+                chipColor = Color.Blue,
+                rating = 456,
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        TurnTimerUI() // Отдельный элемент для таймера хода
     }
 }
