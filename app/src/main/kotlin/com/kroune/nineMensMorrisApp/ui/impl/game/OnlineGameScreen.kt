@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.kroune.nineMensMorrisApp.BUTTON_WIDTH
 import com.kroune.nineMensMorrisApp.Navigation
 import com.kroune.nineMensMorrisApp.R
 import com.kroune.nineMensMorrisApp.common.AppTheme
@@ -74,6 +76,45 @@ fun RenderOnlineGameScreen(
 
     // Vertically Draggable Modifier
     var offsetY by remember { mutableStateOf(0f) }
+
+
+    @Composable
+    fun PlayersUI() {
+        //где pos - это позиции фишек, в классе Position, и там же счётчик с колличеством
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                PlayerCard(
+                    playerName = "Player 1",
+                    avatarRes = R.drawable.pv,
+                    chipColor = Color.Green,
+                    rating = 123,
+                    pos = pos,
+                    modifier = Modifier.weight(1f),)
+
+                Spacer(modifier = Modifier.width(16.dp))
+                PlayerCard(
+                    playerName = "Player 2",
+                    avatarRes = R.drawable.chert_risunok_26,
+                    chipColor = Color.Blue,
+                    rating = 456,
+                    pos = pos,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            TurnTimerUI() // Отдельный элемент для таймера хода
+        }
+    }
+
 
     AppTheme {
         Column() {
@@ -128,6 +169,9 @@ fun RenderOnlineGameScreen(
         }
 
     }
+
+
+
 }
 
 private val displayGiveUpConfirmation = mutableStateOf(false)
@@ -182,6 +226,7 @@ fun PlayerCard(
     avatarRes: Int,
     chipColor: Color,
     rating: Int,
+    pos: Position,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -204,49 +249,29 @@ fun PlayerCard(
         ) {
             Text(text = playerName, fontSize = 16.sp)
             Spacer(modifier = Modifier.height(4.dp))
+
             Box(
                 modifier = Modifier
-                    .size(16.dp)
-                    .background(chipColor, shape = CircleShape)
-            )
+                    .size(
+                        BUTTON_WIDTH * when {
+                            chipColor == Color.Green && pos.pieceToMove -> 1.5f
+                            chipColor == Color.Blue && !pos.pieceToMove -> 1.5f
+                            else -> 1f
+                        }
+                    )
+                    .background(chipColor, CircleShape)
+                    .alpha(if (pos.freeGreenPieces == 0.toUByte()) 0f else 1f),
+                contentAlignment = Alignment.Center
+            ){
+                Text(
+                    color = if (chipColor == Color.Blue) {Color.Green} else {Color.Blue},
+                    text = if (chipColor == Color.Blue) {pos.freeBluePieces.toString()} else {pos.freeGreenPieces.toString()},
+                )
+            }
+
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = "Rating: $rating", fontSize = 14.sp, color = Color.Gray)
         }
     }
 }
 
-@Composable
-fun PlayersUI() {
-//    val uiState = viewModel.gameBoard.pos.collectAsState().value //экземпляр состояния доски из VM
-    //где pos - это позиции фишек, в классе Position, и там же счётчик с колличеством
-    Column(
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            PlayerCard(
-                playerName = "Player 1",
-                avatarRes = R.drawable.pv,
-                chipColor = Color.Green,
-                rating = 123,
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            PlayerCard(
-                playerName = "Player 2",
-                avatarRes = R.drawable.chert_risunok_26,
-                chipColor = Color.Blue,
-                rating = 456,
-                modifier = Modifier.weight(1f)
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        TurnTimerUI() // Отдельный элемент для таймера хода
-    }
-}
