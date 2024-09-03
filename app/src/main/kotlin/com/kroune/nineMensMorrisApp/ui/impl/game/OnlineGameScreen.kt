@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,10 +19,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
@@ -50,7 +48,6 @@ import com.kroune.nineMensMorrisApp.navigateSingleTopTo
 import com.kroune.nineMensMorrisLib.Position
 import kotlin.math.roundToInt
 
-
 /**
  * renders online game screen
  */
@@ -62,7 +59,6 @@ fun RenderOnlineGameScreen(
     onClick: (Int) -> Unit,
     handleUndo: () -> Unit,
     handleRedo: () -> Unit,
-
     onGiveUp: () -> Unit,
     gameEnded: Boolean,
     isGreen: Boolean?,
@@ -74,13 +70,12 @@ fun RenderOnlineGameScreen(
         )
     }
 
-    // Vertically Draggable Modifier
+    // Переменная для хранения смещения по вертикали
     var offsetY by remember { mutableStateOf(0f) }
-
+    val density = LocalDensity.current.density
 
     @Composable
     fun PlayersUI() {
-        //где pos - это позиции фишек, в классе Position, и там же счётчик с колличеством
         Column(
             modifier = Modifier
                 .padding(16.dp)
@@ -98,7 +93,8 @@ fun RenderOnlineGameScreen(
                     chipColor = Color.Green,
                     rating = 123,
                     pos = pos,
-                    modifier = Modifier.weight(1f),)
+                    modifier = Modifier.weight(1f),
+                )
 
                 Spacer(modifier = Modifier.width(16.dp))
                 PlayerCard(
@@ -111,13 +107,15 @@ fun RenderOnlineGameScreen(
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
-            TurnTimerUI() // Отдельный элемент для таймера хода
+            TurnTimerUI()
         }
     }
 
-
     AppTheme {
-        Column() {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
             PlayersUI()
 
@@ -134,25 +132,38 @@ fun RenderOnlineGameScreen(
                     displayGiveUpConfirmation.value = true
                 }
             }
-            RenderPieceCount(
-                pos = pos
-            )
 
+            // Кнопка "Вверх"
+            Button(
+                onClick = {
+                    offsetY = (offsetY - 20 * density).coerceIn(-50 * density, 200 * density)
+                },
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                Text("Вверх")
+            }
+
+            // Игровое поле с примененным смещением
             Box(
                 modifier = Modifier
                     .offset { IntOffset(0, offsetY.roundToInt()) }
-                    .draggable(
-                        orientation = Orientation.Vertical,
-                        state = rememberDraggableState { delta ->
-                            offsetY += delta
-                        }
-                    )) {
+            ) {
                 RenderGameBoard(
                     pos = pos,
                     selectedButton = selectedButton,
                     moveHints = moveHints,
                     onClick = onClick
                 )
+            }
+
+            // Кнопка "Вниз"
+            Button(
+                onClick = {
+                    offsetY = (offsetY + 20 * density).coerceIn(-50 * density, 200 * density)
+                },
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                Text("Вниз")
             }
 
             RenderUndoRedo(
@@ -163,15 +174,14 @@ fun RenderOnlineGameScreen(
                     handleRedo()
                 }
             )
+
             Column {
-                if (isGreen == null) {Text("Waiting for server info")}
+                if (isGreen == null) {
+                    Text("Waiting for server info")
+                }
             }
         }
-
     }
-
-
-
 }
 
 private val displayGiveUpConfirmation = mutableStateOf(false)
@@ -186,7 +196,7 @@ private fun GiveUpConfirm(
             .fillMaxWidth()
             .fillMaxHeight(), contentAlignment = Alignment.Center
     ) {
-        Column() {
+        Column {
             Text("Are you sure you want to give up?")
             Button(onClick = {
                 giveUp()
@@ -262,10 +272,18 @@ fun PlayerCard(
                     .background(chipColor, CircleShape)
                     .alpha(if (pos.freeGreenPieces == 0.toUByte()) 0f else 1f),
                 contentAlignment = Alignment.Center
-            ){
+            ) {
                 Text(
-                    color = if (chipColor == Color.Blue) {Color.Green} else {Color.Blue},
-                    text = if (chipColor == Color.Blue) {pos.freeBluePieces.toString()} else {pos.freeGreenPieces.toString()},
+                    color = if (chipColor == Color.Blue) {
+                        Color.Green
+                    } else {
+                        Color.Blue
+                    },
+                    text = if (chipColor == Color.Blue) {
+                        pos.freeBluePieces.toString()
+                    } else {
+                        pos.freeGreenPieces.toString()
+                    },
                 )
             }
 
@@ -274,4 +292,3 @@ fun PlayerCard(
         }
     }
 }
-
