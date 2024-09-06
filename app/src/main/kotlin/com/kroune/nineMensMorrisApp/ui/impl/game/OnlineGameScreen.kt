@@ -109,7 +109,15 @@ fun RenderOnlineGameScreen(
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
-            TurnTimerUI()
+            Row(){TurnTimerUI()
+                Button(
+                    onClick = { isDraggingEnabled = !isDraggingEnabled },
+                    modifier = Modifier.padding(12.dp)
+                ) {
+                    Text(if (isDraggingEnabled) "Deactivate Move" else "Activate Move")
+                }
+            }
+
         }
     }
 
@@ -135,12 +143,7 @@ fun RenderOnlineGameScreen(
                 }
             }
 
-            Button(
-                onClick = { isDraggingEnabled = !isDraggingEnabled },
-                modifier = Modifier.padding(bottom = 8.dp)
-            ) {
-                Text(if (isDraggingEnabled) "Deactivate Move" else "Activate Move")
-            }
+
 
             // Игровое поле с примененным смещением
             Box(
