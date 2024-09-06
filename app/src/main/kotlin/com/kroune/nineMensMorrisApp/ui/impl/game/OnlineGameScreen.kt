@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -72,6 +73,7 @@ fun RenderOnlineGameScreen(
 
     // Переменная для хранения смещения по вертикали
     var offsetY by remember { mutableStateOf(0f) }
+    var isDraggingEnabled by remember { mutableStateOf(false) }
     val density = LocalDensity.current.density
 
     @Composable
@@ -133,20 +135,25 @@ fun RenderOnlineGameScreen(
                 }
             }
 
-            // Кнопка "Вверх"
             Button(
-                onClick = {
-                    offsetY = (offsetY - 20 * density).coerceIn(-50 * density, 200 * density)
-                },
+                onClick = { isDraggingEnabled = !isDraggingEnabled },
                 modifier = Modifier.padding(bottom = 8.dp)
             ) {
-                Text("Вверх")
+                Text(if (isDraggingEnabled) "Deactivate Move" else "Activate Move")
             }
 
             // Игровое поле с примененным смещением
             Box(
                 modifier = Modifier
                     .offset { IntOffset(0, offsetY.roundToInt()) }
+                    .draggable(
+                        state = rememberDraggableState { delta ->
+                            if (isDraggingEnabled) {
+                                offsetY = (offsetY + delta).coerceIn(-50 * density, 200 * density)
+                            }
+                        },
+                        orientation = Orientation.Vertical
+                    )
             ) {
                 RenderGameBoard(
                     pos = pos,
@@ -156,15 +163,6 @@ fun RenderOnlineGameScreen(
                 )
             }
 
-            // Кнопка "Вниз"
-            Button(
-                onClick = {
-                    offsetY = (offsetY + 20 * density).coerceIn(-50 * density, 200 * density)
-                },
-                modifier = Modifier.padding(top = 8.dp)
-            ) {
-                Text("Вниз")
-            }
 
             RenderUndoRedo(
                 handleUndo = {
