@@ -73,53 +73,15 @@ fun RenderOnlineGameScreen(
 
     // Переменная для хранения смещения по вертикали
     var offsetY by remember { mutableStateOf(0f) }
+    //Стейт для кнопки перемещения доски
     var isDraggingEnabled by remember { mutableStateOf(false) }
+    //Получение плотности пикселей экрана
     val density = LocalDensity.current.density
 
-    @Composable
-    fun PlayersUI() {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                PlayerCard(
-                    playerName = "Player 1",
-                    avatarRes = R.drawable.pv,
-                    chipColor = Color.Green,
-                    rating = 123,
-                    pos = pos,
-                    modifier = Modifier.weight(1f),
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-                PlayerCard(
-                    playerName = "Player 2",
-                    avatarRes = R.drawable.chert_risunok_26,
-                    chipColor = Color.Blue,
-                    rating = 456,
-                    pos = pos,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(){TurnTimerUI()
-                Button(
-                    onClick = { isDraggingEnabled = !isDraggingEnabled },
-                    modifier = Modifier.padding(12.dp)
-                ) {
-                    Text(if (isDraggingEnabled) "Deactivate Move" else "Activate Move")
-                }
-            }
-
-        }
+    fun toggleDragging() {
+        isDraggingEnabled = !isDraggingEnabled
     }
+
 
     AppTheme {
         Column(
@@ -127,7 +89,7 @@ fun RenderOnlineGameScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            PlayersUI()
+            PlayersUI(pos = pos, dragDesk = isDraggingEnabled, onToggleDragging = { toggleDragging() })
 
             if (displayGiveUpConfirmation.value) {
                 GiveUpConfirm(
@@ -293,3 +255,50 @@ fun PlayerCard(
         }
     }
 }
+
+@Composable
+fun PlayersUI(pos: Position, dragDesk : Boolean, onToggleDragging: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            PlayerCard(
+                playerName = "Player 1",
+                avatarRes = R.drawable.pv,
+                chipColor = Color.Green,
+                rating = 123,
+                pos = pos,
+                modifier = Modifier.weight(1f),
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+            PlayerCard(
+                playerName = "Player 2",
+                avatarRes = R.drawable.chert_risunok_26,
+                chipColor = Color.Blue,
+                rating = 456,
+                pos = pos,
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Row() {
+            TurnTimerUI()
+            Button(
+                onClick = { onToggleDragging() }, //291
+                modifier = Modifier.padding(12.dp)
+            ) {
+                Text(if (dragDesk) "Deactivate Move" else "Activate Move")
+            }
+        }
+
+    }
+}
+
