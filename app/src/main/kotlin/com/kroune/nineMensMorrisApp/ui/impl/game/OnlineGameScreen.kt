@@ -65,9 +65,12 @@ fun RenderOnlineGameScreen(
     isGreen: Boolean?,
     navController: NavHostController
 ) {
-    if (gameEnded) {
-        navController.navigateSingleTopTo(
-            Navigation.GameEnd(pos)
+    if (displayGiveUpConfirmation.value) {
+        GiveUpConfirm(
+            giveUp = {
+                onGiveUp()
+            },
+            navController = navController
         )
     }
 

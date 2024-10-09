@@ -3,11 +3,8 @@ package com.kroune.nineMensMorrisApp.data.remote
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpRequestRetry
+import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.logging.ANDROID
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logger
-import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.websocket.WebSockets
 import kotlinx.coroutines.Dispatchers
 
@@ -24,22 +21,20 @@ object Common {
      * The network client for making HTTP requests.
      */
     val network = HttpClient(OkHttp) {
-        install(Logging) {
-            logger = Logger.ANDROID
-            level = LogLevel.ALL
-        }
         install(HttpRequestRetry) {
-            maxRetries = 5
             // retry on timeout
-            retryIf(maxRetries = 5) { request, response -> response.status.value == 408 }
-            retryOnServerErrors(maxRetries = 5)
-            retryOnException(maxRetries = 5, retryOnTimeout = true)
+            retryIf(maxRetries = 5) { request, response ->
+                response.status.value == 408
+            }
+            retryOnExceptionIf(maxRetries = 5) { request, exception ->
+                exception is HttpRequestTimeoutException
+            }
             exponentialDelay()
         }
         install(HttpTimeout) {
-            this.requestTimeoutMillis = 5 * 1000
-            this.socketTimeoutMillis = 60 * 60 * 1000
-            this.connectTimeoutMillis = 5 * 1000
+            this.requestTimeoutMillis = 10 * 1000
+            this.socketTimeoutMillis = 30 * 60 * 1000
+            this.connectTimeoutMillis = 10 * 1000
         }
         install(WebSockets) {
             pingInterval = 3000L

@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.kroune.nineMensMorrisApp.Navigation
 import com.kroune.nineMensMorrisApp.R
-import com.kroune.nineMensMorrisApp.common.AppTheme
 import com.kroune.nineMensMorrisApp.common.LoadingCircle
 import com.kroune.nineMensMorrisApp.navigateSingleTopTo
 
@@ -42,31 +41,29 @@ fun RenderViewAccountScreen(
     pictureByteArray: ByteArray?,
     accountRating: Long?,
 ) {
-    AppTheme {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier
+                .height(100.dp)
+                .fillMaxWidth()
         ) {
-            Row(
+            DrawIcon(pictureByteArray)
+            DrawName(accountName)
+        }
+        DrawRating(accountRating)
+        DrawAccountCreationDate(accountCreationDate)
+        if (ownAccount) {
+            Box(
                 modifier = Modifier
-                    .height(100.dp)
-                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                contentAlignment = Alignment.BottomCenter
             ) {
-                DrawIcon(pictureByteArray)
-                DrawName(accountName)
-            }
-            DrawRating(accountRating)
-            DrawAccountCreationDate(accountCreationDate)
-            if (ownAccount) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight(),
-                    contentAlignment = Alignment.BottomCenter
-                ) {
-                    DrawOwnAccountOptions(
-                        logout = { logout() },
-                        navController = navController
-                    )
-                }
+                DrawOwnAccountOptions(
+                    logout = { logout() },
+                    navController = navController
+                )
             }
         }
     }

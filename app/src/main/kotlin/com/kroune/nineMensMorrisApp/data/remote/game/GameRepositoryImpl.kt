@@ -12,8 +12,8 @@ import io.ktor.websocket.Frame
 import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -22,14 +22,11 @@ import javax.inject.Inject
  * Repository for interacting with server games
  */
 class GameRepositoryImpl @Inject constructor() : GameRepositoryI {
-    override suspend fun startSearchingGame(jwtToken: String): Result<Long> {
+    override suspend fun startSearchingGame(jwtToken: String): Channel<Pair<Boolean, Long>> {
+        val channel = Channel<Pair<Boolean, Long>>()
         // we use this to make sure this function isn't executed in parallel
-        if (searchingForGameJob?.isCompleted == false) {
-            return searchingForGameJob!!.await()
-        }
-        searchingForGameJob = CoroutineScope(networkScope).async {
+        CoroutineScope(networkScope).async {
             runCatching {
-                var gameId: String? = null
                 network.webSocket("ws$SERVER_ADDRESS$USER_API/search-for-game", request = {
                     url {
                         parameters["jwtToken"] = jwtToken
@@ -41,32 +38,25 @@ class GameRepositoryImpl @Inject constructor() : GameRepositoryI {
                                 return@consumeEach
                             }
                             val serverMessage = frame.readText()
-                            println(serverMessage)
                             val serverData =
                                 Json.decodeFromString<Pair<Boolean, Long>>(serverMessage)
+                            channel.send(serverData)
+                            // this indicates that we got game id, so channel should be closed
                             if (!serverData.first) {
-                                gameId = serverData.second.toString()
-                                println("new game id - $gameId")
+                                channel.close()
                                 close()
                                 return@webSocket
                             }
-                            println("expectedWaitingTime - ${serverData.second}")
                         }
                     }
                 }
-                gameId!!.toLong()
             }.onFailure {
                 println("error accessing ${"ws$SERVER_ADDRESS$USER_API/search-for-game"}")
                 it.printStackTrace()
             }
         }
-        return searchingForGameJob!!.await()
+        return channel
     }
-
-    /**
-     * job created when searching for a game
-     */
-    private var searchingForGameJob: Deferred<Result<Long>>? = null
 
     override suspend fun isPlaying(jwtToken: String): Result<Long?> {
         return runCatching {
@@ -76,7 +66,7 @@ class GameRepositoryImpl @Inject constructor() : GameRepositoryI {
                     parameters["jwtToken"] = jwtToken
                 }
             }
-            result.bodyAsText().toLongOrNull()
+            Json.decodeFromString<Long?>(result.bodyAsText())
         }.onFailure {
             println("error accessing ${"http$SERVER_ADDRESS$USER_API/is-playing"}")
             it.printStackTrace()

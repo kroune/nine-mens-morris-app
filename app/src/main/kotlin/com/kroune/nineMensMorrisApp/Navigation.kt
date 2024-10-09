@@ -23,7 +23,7 @@ sealed class Navigation {
 
     @Suppress("UndocumentedPublicClass")
     @Serializable
-    data class GameEnd(val position: Position) : Navigation()
+    data class GameEnd(val position: Position, val movesHistory: List<Position>) : Navigation()
 
     @Suppress("UndocumentedPublicClass")
     @Serializable
@@ -52,6 +52,30 @@ sealed class Navigation {
     @Suppress("UndocumentedPublicClass")
     @Serializable
     data object SearchingOnlineGame : Navigation()
+}
+
+/**
+ * custom nav type for position list
+ * used for "type safe compose navigation"
+ */
+class ListPositionNavType : NavType<List<Position>>(false) {
+    override fun serializeAsValue(value: List<Position>): String {
+        return Json.encodeToString(value)
+    }
+
+    override fun get(bundle: Bundle, key: String): List<Position>? {
+        val posAsJson = bundle.getString(key) ?: return null
+        return Json.decodeFromString<List<Position>>(posAsJson)
+    }
+
+    override fun parseValue(value: String): List<Position> {
+        return Json.decodeFromString<List<Position>>(value)
+    }
+
+    override fun put(bundle: Bundle, key: String, value: List<Position>) {
+        val posAsJson = Json.encodeToString(value)
+        bundle.putString(key, posAsJson)
+    }
 }
 
 /**

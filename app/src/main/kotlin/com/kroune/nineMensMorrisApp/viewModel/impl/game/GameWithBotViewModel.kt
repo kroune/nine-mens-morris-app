@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
  * game with bot model
  */
 class GameWithBotViewModel(
-    onGameEnd: (Position) -> Unit
+    onGameEnd: GameWithBotViewModel.(Position) -> Unit
 ) : ViewModelI() {
 
     /**
@@ -32,6 +32,11 @@ class GameWithBotViewModel(
             onGameEnd(it)
         }
     )
+
+    /**
+     * Returns the history of moves made in the game.
+     */
+    val movesHistory: List<Position> = gameBoard.movesHistory
 
     /**
      * performs needed actions after click
