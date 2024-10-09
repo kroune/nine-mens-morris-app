@@ -2,8 +2,8 @@
 <resources>
     <string name="app_name">Мельница</string>
     <string name="tutorial_fly_condition">если у вас нет фигур, чтобы разместить и у вас есть ровно 3 фишки, то вы можете перемещать вашу фиишку из людой клетки в любую другую (пустую)</string>
-    <string name="tutorial_indicator_piece_count">Цифра внутри круга показывает, сколько еще фигур вы можете разместить</string>
     <string name="tutorial_fly_highlighting">Возможные перемещения подсвечиваются после выбора фишки</string>
+    <string name="tutorial_indicator_piece_count">В каждом из кругов в верху написано, сколько фигур соответствующего цвета еще не размещены</string>
     <string name="tutorial_indicator_piece_move_turn">размер круга показывает, чей сейчас ход</string>
     <string name="tutorial_lose_condition">если у вас меньше 3 фишек (включая те, которые вы можете разместить, то вы проиграли)</string>
     <string name="tutorial_normal_moves_condition">если у вас нет неразмещенных фигур и у вас больше 3 фишек, то вы можете двигать фишки в соседние клетки</string>
@@ -15,4 +15,25 @@
     <string name="tutorial_triples_highlighting">такие линии подсвеченны серым цветом</string>
     <string name="play_game_with_friends">играть с друзьями</string>
     <string name="play_game_with_bot">играть против бота</string>
+    <string name="sign_in">Войдите в аккаунт</string>
+    <string name="no_account_question">Нет аккаунта?</string>
+    <string name="password">Пароль</string>
+    <string name="invalid_password">Ваш пароль не корректен</string>
+    <string name="invalid_login">Ваш логин не корректен</string>
+    <string name="wrong_pass_or_login">Не правильный пароль или логин</string>
+    <string name="server_error">Ошибка сервера, попробуйте чуть позже  или сообщите об этом на гитхабе</string>
+    <string name="network_error">Запрос к серверу не удался, проверьте ваше соединение</string>
+    <string name="username">Имя пользователя</string>
+    <string name="play_online_game">играть онлайн</string>
+    <string name="searching_for_game">Поиск игры</string>
+    <string name="login_in_use">Этот логин уже используется</string>
+    <string name="repeat_pass">повторите ваш новый пароль</string>
+    <string name="pass_doesnt_match">Ваши пароли не совпадают</string>
+    <string name="have_account_question">Уже есть аккаунт?</string>
+    <string name="sign_up">Зарегистрируйтесь</string>
+    <string name="switching_to_next_screen">переходим на следующий экран...</string>
+    <string name="auth_app_error">Неопознанная ошибка. Либо версия приложения устарела, либо что-то серьезное сломалось</string>
+    <string name="auth_no_account_found">Аккаунт с таким логином + паролем не был найден</string>
+    <string name="auth_server_error">Ошибка сервера, должно быть, произошло что-то очень плохое. Сообщите об этой ошибке на github</string>
+    <string name="game_expected_waiting_time">предположительное время ожидания:</string>
 </resources>

@@ -2,30 +2,33 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("io.gitlab.arturbosch.detekt") version "1.23.3"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
+    kotlin("plugin.serialization") version "2.0.0"
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
-tasks.withType<Test>() {
+tasks.withType<Test> {
     useJUnitPlatform()
     testLogging {
         events("passed", "skipped", "failed")
     }
 }
 
+composeCompiler {
+    enableStrongSkippingMode = true
+}
+
 android {
-    namespace = "com.kr8ne.mensMorris"
+    namespace = "com.kroune.nineMensMorrisApp"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "ru.maxim.mensMorris"
-        minSdk = 28
+        applicationId = "com.kroune.nineMensMorrisApp"
+        minSdk = 25
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
+        versionName = "1.1"
     }
 
     buildTypes {
@@ -33,9 +36,14 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -48,27 +56,46 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
     buildToolsVersion = "34.0.0"
+    compileSdk = 34
 }
 
 dependencies {
-    implementation("androidx.activity:activity-compose:1.9.0")
-    implementation(platform("androidx.compose:compose-bom:2024.04.01"))
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.wear.compose:compose-material:1.3.1")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
-    implementation("androidx.navigation:navigation-compose:2.7.7")
-    testImplementation(platform("org.junit:junit-bom:5.10.2"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.04.01"))
-    debugImplementation("androidx.compose.ui:ui-tooling:1.6.6")
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation.compose)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    debugImplementation(libs.androidx.ui.tooling)
+    implementation(libs.kotlinx.serialization.json)
+
+    // ktor
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.ohhttp)
+    implementation(libs.ktor.client.logging)
+
+    // test dependencies
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    debugImplementation(libs.androidx.ui.test.manifest)
+
+    // my own dependencies
+    implementation(libs.x.men.s.morris.lib)
+    implementation(libs.x.men.s.morris.shared)
+
+    // di
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+}
+
+kapt {
+    correctErrorTypes = true
 }

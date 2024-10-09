@@ -2,8 +2,6 @@ name: Generate APK
 
 env:
   path_to_release: app/build/outputs/apk/release
-
-  path_to_debug: app/build/outputs/apk/debug
   # The name of the app
   apk_name: NineMensMorris
 
@@ -63,7 +61,7 @@ jobs:
             --ks ~/keystore.jks \
             --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} \
             --out ${{ env.path_to_release }}/app-release-signed.apk \
-            ${{ env.path_to_release }}/app-release-unsigned.apk
+            ${{ env.path_to_release }}/app-release.apk
 
       - name: Upload APK Release - ${{ env.repository_name }}
         uses: actions/upload-artifact@v4
