@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.kroune.nineMensMorrisLib.Position
 import com.kroune.nineMensMorrisLib.move.Movement
+import java.util.Stack
 
 /**
  * provides a way to get an element from pair
@@ -66,4 +67,17 @@ inline fun AppTheme(function: BoxScope.() -> Unit) {
     ) {
         function()
     }
+}
+
+/**
+ * converts list to stack
+ * [1, 2, 3, 4]
+ * Stack(1, 2, 3, 4)
+ */
+fun <T> List<T>.toStack(): Stack<T> {
+    val stack = Stack<T>()
+    this.forEach {
+        stack.push(it)
+    }
+    return stack
 }

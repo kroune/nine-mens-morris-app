@@ -43,8 +43,6 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import com.kroune.nineMensMorrisApp.Navigation
 import com.kroune.nineMensMorrisApp.R
-import com.kroune.nineMensMorrisApp.StorageManager
-import com.kroune.nineMensMorrisApp.common.AppTheme
 import com.kroune.nineMensMorrisApp.common.LoadingCircle
 import com.kroune.nineMensMorrisApp.common.ParallelogramShape
 import com.kroune.nineMensMorrisApp.common.triangleShape
@@ -56,14 +54,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.min
 
-private var hasSeen = StorageManager.getBoolean("hasSeenTutorial", false)
-    set(value) {
-        if (field != value) {
-            StorageManager.putBoolean("hasSeenTutorial", value)
-            field = value
-        }
-    }
-
 /**
  * Renders welcome screen
  */
@@ -73,61 +63,61 @@ fun RenderWelcomeScreen(
     checkJwtToken: suspend () -> Result<Boolean>,
     hasJwtToken: () -> Boolean,
     resources: Resources,
-    navController: NavHostController
+    navController: NavHostController,
+    hasSeen: Boolean,
+    onTutorialHide: () -> Unit
 ) {
     val viewAccountDataLoadingOverlay = remember { mutableStateOf(false) }
     val playOnlineGameOverlay = remember { mutableStateOf(false) }
     val coroutine = rememberCoroutineScope()
-    AppTheme {
-        // we check this to prevent race condition, since if user is searching for game
-        // viewing account gets less priority
-        if (viewAccountDataLoadingOverlay.value && !playOnlineGameOverlay.value) {
-            HandleAccountViewOverlay(
-                accountId,
-                hasJwtToken,
-                navController
-            )
-        }
-        if (playOnlineGameOverlay.value) {
-            HandleOverlay()
-        }
-        val scrollState = rememberScrollState(if (!hasSeen) Int.MAX_VALUE else 0)
-        val topScreen = remember { mutableStateOf(true) }
-        if (scrollState.value == 0) {
-            hasSeen = true
-        }
-        class CustomFlingBehaviour : FlingBehavior {
-            override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
-                val progress = scrollState.value.toFloat() / scrollState.maxValue
-                val scrollUp =
-                    (topScreen.value && progress < 0.15f) || (!topScreen.value && progress <= 0.85f)
-                topScreen.value = scrollUp
-                coroutine.launch {
-                    scrollState.animateScrollTo(
-                        if (scrollUp) 0 else scrollState.maxValue,
-                        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
-                    )
-                }
-                return 0f
-            }
-        }
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(
-                    state = scrollState, flingBehavior = CustomFlingBehaviour()
+    // we check this to prevent race condition, since if user is searching for game
+    // viewing account gets less priority
+    if (viewAccountDataLoadingOverlay.value && !playOnlineGameOverlay.value) {
+        HandleAccountViewOverlay(
+            accountId,
+            hasJwtToken,
+            navController
+        )
+    }
+    if (playOnlineGameOverlay.value) {
+        HandleOverlay()
+    }
+    val scrollState = rememberScrollState(if (!hasSeen) Int.MAX_VALUE else 0)
+    val topScreen = remember { mutableStateOf(true) }
+    if (scrollState.value == 0) {
+        onTutorialHide()
+    }
+    class CustomFlingBehaviour : FlingBehavior {
+        override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
+            val progress = scrollState.value.toFloat() / scrollState.maxValue
+            val scrollUp =
+                (topScreen.value && progress < 0.15f) || (!topScreen.value && progress <= 0.85f)
+            topScreen.value = scrollUp
+            coroutine.launch {
+                scrollState.animateScrollTo(
+                    if (scrollUp) 0 else scrollState.maxValue,
+                    animationSpec = tween(durationMillis = 300, easing = LinearEasing)
                 )
-        ) {
-            RenderMainScreen(
-                resources,
-                navController,
-                playOnlineGameOverlay,
-                viewAccountDataLoadingOverlay,
-                hasJwtToken,
-                checkJwtToken
-            )
-            TutorialScreen(resources).InvokeRender()
+            }
+            return 0f
         }
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(
+                state = scrollState, flingBehavior = CustomFlingBehaviour()
+            )
+    ) {
+        RenderMainScreen(
+            resources,
+            navController,
+            playOnlineGameOverlay,
+            viewAccountDataLoadingOverlay,
+            hasJwtToken,
+            checkJwtToken
+        )
+        TutorialScreen(resources).InvokeRender()
     }
 }
 

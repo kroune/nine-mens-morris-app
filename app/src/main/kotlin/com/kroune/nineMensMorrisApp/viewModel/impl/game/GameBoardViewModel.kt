@@ -7,6 +7,7 @@ import com.kroune.nineMensMorrisApp.viewModel.useCases.GameBoardUseCase
 import com.kroune.nineMensMorrisLib.Position
 import com.kroune.nineMensMorrisLib.gameStartPosition
 import com.kroune.nineMensMorrisLib.move.Movement
+import java.util.Stack
 
 /**
  * view model for game board
@@ -51,13 +52,22 @@ class GameBoardViewModel(
     /**
      * stores all pieces which can be moved (used for highlighting)
      */
-    val moveHints: MutableList<Int> = mutableListOf(),
+    moveHints: MutableList<Int> = mutableListOf(),
     /**
      * used for storing info of the previous (valid one) clicked button
      */
     val selectedButton: MutableState<Int?> = mutableStateOf(null),
     onGameEnd: (Position) -> Unit
 ) : ViewModelI() {
+    constructor(pos: Position, movesHistory: Stack<Position>) : this(
+        pos = pos,
+        onGameEnd = {}
+    ) {
+        useCase.movesHistory.clear()
+        movesHistory.forEach {
+            useCase.movesHistory.push(it)
+        }
+    }
 
     private val useCase = GameBoardUseCase(
         mutableStateOf(pos),
@@ -70,11 +80,21 @@ class GameBoardViewModel(
     )
 
     /**
+     * Retrieves the list of indices of pieces that can be moved (used for highlighting).
+     */
+    val moveHints: MutableState<List<Int>> = useCase.moveHints
+
+    /**
      * quick access
      */
     fun handleClick(index: Int) {
         return useCase.handleClick(index)
     }
+
+    /**
+     * history of player moves
+     */
+    val movesHistory = useCase.movesHistory
 
     /**
      * handles clicking on the button with provided index

@@ -3,12 +3,8 @@ package com.kroune.nineMensMorrisApp.viewModel.impl.game
 import com.kroune.nineMensMorrisApp.data.remote.account.AccountInfoRepositoryI
 import com.kroune.nineMensMorrisApp.data.remote.game.GameRepositoryI
 import com.kroune.nineMensMorrisApp.viewModel.interfaces.ViewModelI
+import com.kroune.nineMensMorrisApp.viewModel.useCases.SearchingForGameUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -16,37 +12,24 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class SearchingForGameViewModel @Inject constructor(
-    private val gameRepositoryI: GameRepositoryI,
-    private val accountInfoRepositoryI: AccountInfoRepositoryI
+    private val accountInfoRepository: AccountInfoRepositoryI,
+    private val gameRepository: GameRepositoryI
 ) : ViewModelI() {
+    private val searchingForGameUseCase =
+        SearchingForGameUseCase(accountInfoRepository, gameRepository)
 
     /**
-     * id of the game
-     * used for callback
+     * game id
      */
-    val gameId = MutableStateFlow<Long?>(null)
+    val gameId = searchingForGameUseCase.gameId
+
+    /**
+     * expected time to wait
+     * calculated on the server
+     */
+    val expectedWaitingTime = searchingForGameUseCase.expectedWaitingTime
 
     init {
-        println("init")
-        CoroutineScope(Dispatchers.IO).launch {
-            while (true) {
-                val oldGameId =
-                    gameRepositoryI.isPlaying(accountInfoRepositoryI.jwtTokenState.value!!)
-                        .getOrNull()
-                if (oldGameId != null) {
-                    gameId.value = oldGameId
-                    return@launch
-                }
-                val newGameId = gameRepositoryI.startSearchingGame(
-                    accountInfoRepositoryI.jwtTokenState.value!!
-                ).getOrNull()
-                if (newGameId != null) {
-                    gameId.value = newGameId
-                    break
-                } else {
-                    delay(20000L)
-                }
-            }
-        }
+        searchingForGameUseCase.searchForGame()
     }
 }

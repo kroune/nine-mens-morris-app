@@ -36,4 +36,5 @@
     <string name="auth_app_error">Unrecognised error. Either app version is obsolete or something serious broke</string>
     <string name="auth_no_account_found">No account with such login + password found</string>
     <string name="auth_server_error">Server error, something bad must have happened. Report this issue on github</string>
+    <string name="game_expected_waiting_time">expected waiting time:</string>
 </resources>
