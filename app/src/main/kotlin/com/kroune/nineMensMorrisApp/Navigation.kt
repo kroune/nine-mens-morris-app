@@ -52,6 +52,10 @@ sealed class Navigation {
     @Suppress("UndocumentedPublicClass")
     @Serializable
     data object SearchingOnlineGame : Navigation()
+
+    @Suppress("UndocumentedPublicClass")
+    @Serializable
+    data object OnlineLeaderboard : Navigation()
 }
 
 /**

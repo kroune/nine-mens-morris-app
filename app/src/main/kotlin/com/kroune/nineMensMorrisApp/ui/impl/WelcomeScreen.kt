@@ -208,6 +208,19 @@ private fun RenderMainScreen(
                     text = resources.getString(R.string.play_online_game), color = Color.White
                 )
             }
+            Button(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                onClick = {
+                    navController?.navigateSingleTopTo(Navigation.OnlineLeaderboard)
+                },
+                shape = RoundedCornerShape(5.dp),
+                colors = ButtonColors(Color.Black, Color.Black, Color.Gray, Color.Gray)
+            ) {
+                Text(
+                    text = "Online leaderboard",
+                    color = Color.White
+                )
+            }
         }
         ViewAccountElement(
             viewAccountDataLoadingOverlay = viewAccountDataLoadingOverlay,

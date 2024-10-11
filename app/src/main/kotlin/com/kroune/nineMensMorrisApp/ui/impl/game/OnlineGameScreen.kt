@@ -75,12 +75,15 @@ fun RenderOnlineGameScreen(
     var offsetY by remember { mutableStateOf(0f) }
     //Стейт для кнопки перемещения доски
     var isDraggingEnabled by remember { mutableStateOf(false) }
-    //Получение плотности пикселей экрана
-    val density = LocalDensity.current.density
 
     fun toggleDragging() {
         isDraggingEnabled = !isDraggingEnabled
     }
+
+    //Получение плотности пикселей экрана
+    val density = LocalDensity.current.density
+
+
 
 
     AppTheme {
