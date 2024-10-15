@@ -1,12 +1,15 @@
-package com.kroune.nineMensMorrisApp.ui.impl
+package com.kroune.nineMensMorrisApp.ui.impl.leaderboard
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -21,6 +24,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.kroune.nineMensMorrisApp.BUTTON_WIDTH
+
+@Composable
+fun RenderLeaderboardScreen(
+    players: List<Player>,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = Modifier
+            .padding(0.dp, BUTTON_WIDTH * 9.5f, 0.dp, 0.dp)
+            .height(IntrinsicSize.Max)
+            .fillMaxWidth()
+    ) {
+        OnlineLeaderboard(players = players)
+    }
+}
 
 @Composable
 fun OnlineLeaderboard(
@@ -47,7 +66,7 @@ fun OnlineLeaderboard(
 @Composable
 fun LeaderboardItem(player: Player) {
     Card(
-               modifier = Modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .background(Color.Gray)
