@@ -1,22 +1,43 @@
+rootProject.name = "nineMensMorrisAppKMP"
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 pluginManagement {
     repositories {
-        google()
+        google {
+            @Suppress("UnstableApiUsage")
+            mavenContent {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
+            }
+        }
         mavenCentral()
         gradlePluginPortal()
-    }
-}
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-        maven {
-            url = uri("https://jitpack.io")
-            name = "JitPack"
-        }
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+        maven("https://packages.jetbrains.team/maven/p/firework/dev")
     }
 }
 
-rootProject.name = "nine-mens-morris-app"
-include(":app")
- 
+dependencyResolutionManagement {
+    @Suppress("UnstableApiUsage")
+    repositories {
+        google {
+            @Suppress("UnstableApiUsage")
+            mavenContent {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
+            }
+        }
+        mavenCentral()
+        maven("https://packages.jetbrains.team/maven/p/firework/dev")
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    }
+}
+
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.9.0"
+}
+
+include(":composeApp")
+include(":baselineprofile")

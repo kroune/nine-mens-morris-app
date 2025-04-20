@@ -1,0 +1,217 @@
+package io.github.kroune.nine_mens_morris_kmp_app.screen.other
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
+import androidx.compose.ui.unit.sp
+import io.github.kroune.nine_mens_morris_kmp_app.R
+import io.github.kroune.nine_mens_morris_kmp_app.component.other.ViewOwnAccountScreenComponent
+import io.github.kroune.nine_mens_morris_kmp_app.event.other.ViewOwnAccountScreenEvent
+import io.github.kroune.nine_mens_morris_kmp_app.model.UploadPictureApiResponses
+import io.github.kroune.nine_mens_morris_kmp_app.screen.DrawAccountCreationDate
+import io.github.kroune.nine_mens_morris_kmp_app.screen.DrawIcon
+import io.github.kroune.nine_mens_morris_kmp_app.screen.DrawName
+import io.github.kroune.nine_mens_morris_kmp_app.screen.DrawRating
+import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.core.PickerMode
+import io.github.vinceglb.filekit.core.PickerType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+@Composable
+fun ViewOwnAccountScreen(
+    component: ViewOwnAccountScreenComponent
+) {
+    val onEvent: (ViewOwnAccountScreenEvent) -> Unit = { component.onEvent(it) }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    with(component) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState)
+            }
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .padding(padding),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    BoxWithConstraints {
+                        val size = min(this.maxWidth, this.maxHeight) / 2
+                        DrawIcon(
+                            Modifier
+                                .size(size)
+                                .aspectRatio(1f, true),
+                            pictureByteArray = accountPicture,
+                            onReload = { onEvent(ViewOwnAccountScreenEvent.ReloadIcon) },
+                            onClick = {},
+                            scope = scope,
+                            snackbarHostState = snackbarHostState
+                        )
+                    }
+                    DrawName(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        text = {
+                            Text(
+                                it,
+                                fontSize = 30.sp,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        },
+                        accountName = accountName,
+                        onReload = { onEvent(ViewOwnAccountScreenEvent.ReloadName) },
+                        scope = scope,
+                        snackbarHostState = snackbarHostState
+                    )
+                }
+                DrawRating(
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                        .height(30.dp),
+                    text = {
+                        Text(
+                            "${stringResource(R.string.rating)}: $it",
+                            fontSize = 20.sp
+                        )
+                    },
+                    accountRating = accountRating,
+                    reloadRating = { onEvent(ViewOwnAccountScreenEvent.ReloadRating) },
+                    scope = scope,
+                    snackbarHostState = snackbarHostState
+                )
+                DrawAccountCreationDate(
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                        .height(30.dp),
+                    text = { (first, second, third) ->
+                        Text(
+                            "$first-$second-$third",
+                            fontSize = 20.sp
+                        )
+                    },
+                    accountCreationDate = accountCreationDate,
+                    onReload = {
+                        onEvent(ViewOwnAccountScreenEvent.ReloadCreationDate)
+                    },
+                    scope = scope, snackbarHostState = snackbarHostState
+                )
+                val launcher = rememberFilePickerLauncher(
+                    type = PickerType.Image,
+                    mode = PickerMode.Single
+                ) { file ->
+                    if (file == null) {
+                        return@rememberFilePickerLauncher
+                    }
+                    CoroutineScope(Dispatchers.Default).launch {
+                        component.onEvent(ViewOwnAccountScreenEvent.UploadNewPicture(file.readBytes()))
+                    }
+                }
+                Button(
+                    { launcher.launch() },
+                ) {
+                    Text(stringResource(R.string.upload_picture))
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    DrawOwnAccountOptions(
+                        onEvent
+                    )
+                }
+            }
+            HandleError(uploadingNewPicture, snackbarHostState, scope)
+        }
+    }
+}
+
+@Composable
+private fun HandleError(
+    uploadingNewPicture: UploadPictureApiResponses?,
+    snackbarHostState: SnackbarHostState,
+    scope: CoroutineScope
+) {
+    val text = when (uploadingNewPicture) {
+        is UploadPictureApiResponses.Success -> {
+            stringResource(R.string.image_was_updated)
+        }
+
+        is UploadPictureApiResponses.ServerError -> {
+            stringResource(R.string.server_error)
+        }
+
+        is UploadPictureApiResponses.NetworkError -> {
+            stringResource(R.string.network_error)
+        }
+
+        is UploadPictureApiResponses.CredentialsError -> {
+            stringResource(R.string.credentials_error)
+        }
+
+        is UploadPictureApiResponses.TooLargeImage -> {
+            stringResource(
+                R.string.image_too_large,
+                uploadingNewPicture.maxWidth,
+                uploadingNewPicture.maxHeight
+            )
+        }
+
+        UploadPictureApiResponses.UnknownError -> {
+            stringResource(R.string.unknown_error)
+        }
+
+        null -> return
+    }
+    SideEffect {
+        scope.launch {
+            snackbarHostState.showSnackbar(text)
+        }
+    }
+}
+
+/**
+ * draws specific settings for our account
+ */
+@Composable
+fun DrawOwnAccountOptions(
+    onEvent: (ViewOwnAccountScreenEvent) -> Unit
+) {
+    Button(
+        onClick = {
+            onEvent(ViewOwnAccountScreenEvent.Logout)
+        },
+    ) {
+        Text(stringResource(R.string.log_out))
+    }
+}
