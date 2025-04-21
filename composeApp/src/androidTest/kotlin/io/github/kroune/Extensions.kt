@@ -57,5 +57,3 @@ inline fun SemanticsNodeInteractionCollection.none(lambda: (SemanticsNodeInterac
     }
     return allDoNotMatch
 }
-
-expect annotation class UiTest()

@@ -12,7 +12,6 @@ import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import io.github.kroune.UiTest
 import io.github.kroune.forEach
 import io.github.kroune.nine_mens_morris_kmp_app.component.other.welcomeScreenComponent.WelcomeScreenComponentI
 import io.github.kroune.nine_mens_morris_kmp_app.event.other.WelcomeScreenEvent
@@ -32,7 +31,6 @@ import kotlin.test.assertTrue
 
 class WelcomeScreenTest {
     @OptIn(ExperimentalTestApi::class)
-    @UiTest
     @Test
     fun testAnimation() {
         runComposeUiTest {
@@ -47,7 +45,7 @@ class WelcomeScreenTest {
                     )
 
                 override fun onEvent(event: WelcomeScreenEvent) {
-                    error("Not needed for test")
+                    error("Not needed for androidTest")
                 }
 
                 override val accountIdFailure: AccountIdByJwtTokenApiResponses? = null

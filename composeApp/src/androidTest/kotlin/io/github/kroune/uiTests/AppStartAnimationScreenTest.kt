@@ -9,7 +9,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import io.github.kroune.UiTest
 import io.github.kroune.nine_mens_morris_kmp_app.component.other.appStartAnimationComponent.AppStartAnimationComponentI
 import io.github.kroune.nine_mens_morris_kmp_app.event.other.AppStartAnimationScreenEvent
 import io.github.kroune.nine_mens_morris_kmp_app.screen.other.AppStartAnimationScreen
@@ -19,7 +18,6 @@ import kotlin.test.assertTrue
 
 class AppStartAnimationScreenTest {
     @OptIn(ExperimentalTestApi::class)
-    @UiTest
     @Test
     fun test() {
         runComposeUiTest {

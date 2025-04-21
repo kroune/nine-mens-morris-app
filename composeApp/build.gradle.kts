@@ -44,9 +44,9 @@ dependencies {
     implementation(libs.ktor.client.cio)
 //            implementation(compose.uiTooling)
 //            implementation(compose.preview)
-    testImplementation(kotlin("test"))
+    androidTestImplementation(kotlin("test"))
     @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-    testImplementation(compose.uiTest)
+    androidTestImplementation(compose.uiTest)
 }
 
 @OptIn(ExperimentalEncodingApi::class)

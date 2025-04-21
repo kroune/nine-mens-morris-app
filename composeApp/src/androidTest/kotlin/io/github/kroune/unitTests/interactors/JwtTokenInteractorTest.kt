@@ -23,37 +23,37 @@ class JwtTokenInteractorTest {
             }
 
             override fun deleteJwtToken() {
-                error("Not needed for test")
+                error("Not needed for androidTest")
             }
 
             override fun updateJwtToken(newJwtToken: String) {
-                error("Not needed for test")
+                error("Not needed for androidTest")
             }
         }
         val remote = object : AuthRepositoryI {
             override suspend fun checkJwtToken(jwtToken: String): CheckJwtTokenApiResponses {
-                error("Not needed for test")
+                error("Not needed for androidTest")
             }
 
             override suspend fun login(login: String, password: String): LoginApiResponse {
-                error("Not needed for test")
+                error("Not needed for androidTest")
             }
 
             override suspend fun register(login: String, password: String): RegisterApiResponses {
-                error("Not needed for test")
+                error("Not needed for androidTest")
             }
         }
         val localId = object : AccountIdDataSourceI {
             override fun deleteAccountId() {
-                error("Not needed for test")
+                error("Not needed for androidTest")
             }
 
             override fun getAccountId(): Long? {
-                error("Not needed for test")
+                error("Not needed for androidTest")
             }
 
             override fun updateAccountId(newAccountId: Long) {
-                error("Not needed for test")
+                error("Not needed for androidTest")
             }
 
         }
