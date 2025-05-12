@@ -15,7 +15,7 @@
 * **[license](#license)**
 
 ## Preview
-[android](https://github.com/kroune/nine-mens-morris-app-kmp/tree/v1.0.1/demo/screenshots/android)
+[android](https://github.com/kroune/nine-mens-morris-app/tree/v1.0.1/demo/screenshots/android)
 
 ## Run app
 Use **apk** format for Android. It is tiny (around 2 mb) and works well ([link](https://github.com/kroune/nine-mens-morris-app/releases))
